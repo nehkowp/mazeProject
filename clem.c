@@ -96,7 +96,7 @@ int deplacementValide(int positionL, int positionC, arbreChemins* a){
         if((*a)->fils[n]->positions[0] == positionL && (*a)->fils[n]->positions[1] == positionC){
             *a = (*a)->fils[n];
             val = 1;
-
+            
         }
     }
     if((*a)->parent->positions[0] == positionL && (*a)->parent->positions[1] == positionC){
@@ -108,12 +108,36 @@ int deplacementValide(int positionL, int positionC, arbreChemins* a){
 }
 
 
+void verifEvent(int*** maze, int positionL, int positionsC){
+    if((*maze)[positionL][positionsC] == EVENT){
+        int randomEvent = rand() % 2;
+        switch (randomEvent) {
+            case 0:
+                sleep(1);
+                printf("Event 0\n");
+                break;
+            case 1:
+                sleep(1);
+                printf("Event 1\n");
+                break;
+            case 2:
+                sleep(1);
+                printf("Event 2\n");
+                break;
+            default:
+                printf("Error Event Switch Case\n");
+                break;
+        }
+    }
+}
+
 
 void deplacementMaze(arbreChemins* a,int*** maze,int positions[2]){
     switch (deplacementTouche()) {
 
                 case HAUT:
                     if(deplacementValide(positions[0]-1,positions[1],a)){
+                        verifEvent(maze,positions[0]-1,positions[1]);
                         (*maze)[positions[0]-1][positions[1]] = PLAYER;
                         (*maze)[positions[0]][positions[1]] = SPACE;
                         positions[0]--;
@@ -121,6 +145,7 @@ void deplacementMaze(arbreChemins* a,int*** maze,int positions[2]){
                     break;
                 case DROITE:
                     if(deplacementValide(positions[0],positions[1]+1,a)){
+                        verifEvent(maze,positions[0],positions[1]+1);
                         (*maze)[positions[0]][positions[1]+1] = PLAYER;
                         (*maze)[positions[0]][positions[1]] = SPACE;
                         positions[1]++;
@@ -128,6 +153,7 @@ void deplacementMaze(arbreChemins* a,int*** maze,int positions[2]){
                     break;
                 case GAUCHE:
                     if(deplacementValide(positions[0],positions[1]-1,a)){
+                        verifEvent(maze,positions[0],positions[1]-1);
                         (*maze)[positions[0]][positions[1]-1] = PLAYER;
                         (*maze)[positions[0]][positions[1]] = SPACE;
                         positions[1]--;
@@ -135,6 +161,7 @@ void deplacementMaze(arbreChemins* a,int*** maze,int positions[2]){
                     break;
                 case BAS:
                     if(deplacementValide(positions[0]+1,positions[1],a)){
+                        verifEvent(maze,positions[0]+1,positions[1]);
                         (*maze)[positions[0]+1][positions[1]] = PLAYER;
                         (*maze)[positions[0]][positions[1]] = SPACE;
                         positions[0]++;

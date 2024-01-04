@@ -47,17 +47,15 @@ int main(){
     Jeu jeu;
     //affichage menu #ETIENNE
     initJeu(&jeu);
-    while(jeu.level < 4){
+    while(jeu.level < 30){
         creerMaze(&jeu);
         placerEvents(&jeu);
-
-        //placer event #PAUL
         while(jeu.arbreChemin->type) {
             system("clear");
             afficherMatrice(jeu.maze,jeu.sizeMaze);
             deplacementMaze(&jeu.arbreChemin,&jeu.maze,jeu.j.positions);
-            // verif event PAUL
-        }
+
+            }
         free(jeu.maze);
         free(jeu.arbreChemin);
         jeu.level = jeu.level+2;
