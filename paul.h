@@ -5,6 +5,12 @@
 #define BAS 115
 #define GAUCHE 113
 #define DROITE 100
+#define HOTBAR1 49
+#define HOTBAR2 50
+#define HOTBAR3 51 
+#define HOTBAR4 52
+#define HOTBAR5 53
+
 
 #include <stdio.h>
 void emptyBuffer();

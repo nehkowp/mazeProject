@@ -3,12 +3,25 @@
 
 #include "stdio.h"
 
+typedef enum {NONE,HEALTH,DAMAGE,ARIANE}itemListe;
+
+typedef struct coords{
+    int positions[2];
+    struct coords* suivant;
+}coords;
+typedef coords* CoordsStack;
+struct Item{
+    int quantite;
+    int type;
+    char* name;
+};
+typedef struct Item Item;
 struct Joueur{
     int pvHealth;
+    Item* inventaire;
     int positions[2];
 };
 typedef struct Joueur Joueur;
-
 
 typedef struct node {
   int positions[2];
@@ -19,11 +32,6 @@ typedef struct node {
 }node;
 typedef node* arbreChemins;
 
-struct Evenement{
-    int positions[2];
-    int type;
-    char* nom;
-};
 struct Jeu{
     Joueur j;
     int level;

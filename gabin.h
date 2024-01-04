@@ -13,7 +13,8 @@
 #define INITIALSIZE 7
 
 void testGabin();
-void afficherMatrice(int** matrice , int taille);
+void afficherMatrice1(int** matrice , int taille);
+void afficherMatrice2(int** matrice , int taille);
 int** genererMatrice(int n);
 void genererChemin(int** matrice, int taille);
 int mainGabin();

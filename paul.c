@@ -30,7 +30,6 @@ char deplacementTouche(){
     // ZQSD
      
     c =getchar();
-     
     switch(c){
     case HAUT: //haut
       //printf("vous avez écrit %d => %c haut !",c,c);
@@ -48,6 +47,27 @@ char deplacementTouche(){
       //printf("vous avez écrit %d => %c bas !",c,c);
       pastermine=0;
       break;
+    case HOTBAR1: //bas
+      //printf("vous avez écrit %d => %c bas !",c,c);
+      pastermine=0;
+      break;
+    case HOTBAR2: //bas
+      //printf("vous avez écrit %d => %c bas !",c,c);
+      pastermine=0;
+      break;
+    case HOTBAR3: //bas
+      //printf("vous avez écrit %d => %c bas !",c,c);
+      pastermine=0;
+      break;
+    case HOTBAR4: //bas
+      //printf("vous avez écrit %d => %c bas !",c,c);
+      pastermine=0;
+      break;
+    case HOTBAR5: //bas
+      //printf("vous avez écrit %d => %c bas !",c,c);
+      pastermine=0;
+      break;
+
     case 97:
       printf("vous avez tapé la lettre %c pour quitter le programme!",c);
       
