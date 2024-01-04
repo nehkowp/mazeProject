@@ -18,7 +18,7 @@ int main(){
         while(jeu.arbreChemin->type) {
             system("clear");
             afficherMatrice1(jeu.maze,jeu.sizeMaze);
-            afficherMatrice2(jeu.maze,jeu.sizeMaze);
+            // afficherMatrice2(jeu.maze,jeu.sizeMaze);
             afficherInventaire(jeu);
             deplacementMaze(&jeu,&jeu.arbreChemin,&jeu.maze,jeu.j.positions);
             }
