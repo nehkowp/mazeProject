@@ -184,7 +184,7 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
         int randomEvent;
         // pas remettre l'inversion clavier si on l'a pas enlever avant
         do{
-            randomEvent = rand() % 2 + 4;
+            randomEvent = rand() % 6;
         }while (precEvent);
         
         switch (randomEvent) {
