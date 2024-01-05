@@ -121,6 +121,11 @@ void damageTrapEvent(Jeu* jeu){
     jeu->j.pvHealth--;
 }
 
+void neverGonnaGiveUP(){
+    system("xdg-open https://www.youtube.com/watch?v=dQw4w9WgXcQ &");
+    system("sleep 2");
+    system("clear");     
+}
 
 CoordsStack creerCord(int positionL, int positionC){
     CoordsStack nvElt;
@@ -175,7 +180,13 @@ void filAriane(Jeu* jeu){
 
 void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
     if((*maze)[positionL][positionsC] == EVENT){
-        int randomEvent = rand() % 3;
+        int precEvent =0;
+        int randomEvent;
+        // pas remettre l'inversion clavier si on l'a pas enlever avant
+        do{
+            randomEvent = rand() % 2 + 4;
+        }while (precEvent);
+        
         switch (randomEvent) {
             case 0:
                 healthPotionEvent(jeu);
@@ -185,6 +196,16 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
                 break;
             case 2:
                 // filAriane(jeu);
+                break;
+            case 3:
+                neverGonnaGiveUP();
+                break;
+            case 4:
+                inversion=1;
+                precEvent=1;
+                break;
+            case 5:
+                inversion=0;
                 break;
             default:
                 printf("Error Event Switch Case\n");
@@ -199,6 +220,12 @@ char* emoji(int type){
             return " - ";
         case HEALTH:
             return "💊 ";
+        case FUN:
+            return "🔥 ";
+        case DRUNK:
+            return "🍾 ";
+        case MILK:
+            return "🥛 ";
         default:
             return "Error";
     }

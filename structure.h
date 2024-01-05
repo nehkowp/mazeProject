@@ -3,7 +3,8 @@
 
 #include "stdio.h"
 
-typedef enum {NONE,HEALTH,DAMAGE,ARIANE}itemListe;
+typedef enum {NONE,HEALTH,DAMAGE,ARIANE,FUN,DRUNK,MILK}itemListe;
+
 
 typedef struct coords{
     int positions[2];

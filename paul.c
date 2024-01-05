@@ -4,6 +4,8 @@
 #include <stdlib.h>   // exit()
 #include <termios.h>
 
+int inversion = 0;
+
 void emptyBuffer() {
   char c;
   while (((c = getchar()) != '\n') && (c != EOF));
@@ -26,10 +28,49 @@ char deplacementTouche(){
   cfmakeraw(&tty_opts_raw);
   tcsetattr(STDIN_FILENO, TCSANOW, &tty_opts_raw);
 
-  while (pastermine){
+  while (pastermine) {
     // ZQSD
-     
-    c =getchar();
+    c = getchar();
+    if (inversion == 1) {
+      switch (c) {
+        case HAUT:
+          c = BAS;
+          pastermine = 0;
+          break;
+        case GAUCHE:
+          c = DROITE;
+          pastermine = 0;
+          break;
+        case DROITE:
+          c = GAUCHE;
+          pastermine = 0;
+          break;
+        case BAS:
+          c = HAUT;
+          pastermine = 0;
+          break;
+        case HOTBAR1: 
+          pastermine=0;
+          break;
+        case HOTBAR2: //bas
+          pastermine=0;
+          break;
+        case HOTBAR3: //bas
+          //printf("vous avez écrit %d => %c bas !",c,c);
+          pastermine=0;
+          break;
+        case HOTBAR4: //bas
+          //printf("vous avez écrit %d => %c bas !",c,c);
+          pastermine=0;
+          break;
+        case HOTBAR5: //bas
+          //printf("vous avez écrit %d => %c bas !",c,c);
+          pastermine=0;
+          break;
+        default:
+          break;
+      }
+    }
     switch(c){
     case HAUT: //haut
       //printf("vous avez écrit %d => %c haut !",c,c);

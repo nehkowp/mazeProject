@@ -11,6 +11,7 @@ void creerMaze(Jeu* jeu);
 void placerEvents(Jeu* jeu);
 void afficherInventaire(Jeu jeu);
 arbreChemins creerArbreChemins(arbreChemins a, int positionL , int positionC, int** maze);
+void neverGonnaGiveUP();
 arbreChemins creerArbreCheminsCache(arbreChemins a, int positionL, int positionC,  int** maze,arbreChemins a_parent);
 void afficherArbreChemins(arbreChemins a,int** maze);
 int deplacementValide(int positionL, int positionC, arbreChemins* a);

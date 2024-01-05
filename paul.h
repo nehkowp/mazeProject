@@ -11,6 +11,7 @@
 #define HOTBAR4 52
 #define HOTBAR5 53
 
+extern int inversion;
 
 #include <stdio.h>
 void emptyBuffer();
