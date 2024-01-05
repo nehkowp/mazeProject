@@ -121,7 +121,7 @@ void damageTrapEvent(Jeu* jeu){
     jeu->j.pvHealth--;
 }
 
-/*
+
 CoordsStack creerCord(int positionL, int positionC){
     CoordsStack nvElt;
     nvElt  = malloc(sizeof(coords)*1);
@@ -146,12 +146,14 @@ CoordsStack ajouterCoord(CoordsStack p, int positionL, int positionC){
 CoordsStack cheminAriane(arbreChemins arbre,CoordsStack coords){
     coords = ajouterCoord(coords,arbre->positions[0],arbre->positions[1]);
     printf("[%d - %d]\n",coords->positions[0],coords->positions[1]);
-    if(arbre->type == END){
+    if(arbre->type){
         return coords;
     }else{
         for(int nbFils = 0; nbFils < arbre->nbFils; nbFils++){
-            cheminAriane(arbre->fils[nbFils],coords);
+            coords->suivant = cheminAriane(arbre->fils[nbFils],coords);
+
         }
+        coords->suivant = cheminAriane(arbre->parent,coords);
     }
     return NULL;
 }
@@ -160,11 +162,15 @@ void filAriane(Jeu* jeu){
     CoordsStack ariane = cheminAriane(jeu->arbreChemin,NULL);
     while(ariane != NULL){
         printf("[%d - %d]\n",ariane->positions[0],ariane->positions[1]);
-        ariane = ariane->suivant;
+        printf("[%d - %d]\n",ariane->suivant->positions[0],ariane->suivant->positions[1]);
+        // printf("[%d - %d]\n",ariane->positions[0],ariane->positions[1]);
+
+        CoordsStack avantDernier = ariane->suivant;
+        ariane = avantDernier;
     }
     sleep(1);
 }
-*/
+
 
 
 void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
@@ -172,12 +178,15 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
         int randomEvent = rand() % 3;
         switch (randomEvent) {
             case 0:
+                // filAriane(jeu);
                 healthPotionEvent(jeu);
                 break;
             case 1:
+                // filAriane(jeu);
                 damageTrapEvent(jeu);
                 break;
             case 2:
+                // damageTrapEvent(jeu);
                 // filAriane(jeu);
                 break;
             default:
