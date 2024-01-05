@@ -110,8 +110,8 @@ void ajouterItemInventaire(Jeu* jeu, int type, char* name){
 }
 
 void healthPotionEvent(Jeu* jeu){
-    if(jeu->j.pvHealth == 10){
-        ajouterItemInventaire(jeu,HEALTH,"Healt Potion");
+    if(jeu->j.pvHealth > 9){
+        ajouterItemInventaire(jeu,HEALTH,"Health Potion");
     }else{
         jeu->j.pvHealth++;
     }
@@ -178,15 +178,12 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
         int randomEvent = rand() % 3;
         switch (randomEvent) {
             case 0:
-                // filAriane(jeu);
                 healthPotionEvent(jeu);
                 break;
             case 1:
-                // filAriane(jeu);
                 damageTrapEvent(jeu);
                 break;
             case 2:
-                // damageTrapEvent(jeu);
                 // filAriane(jeu);
                 break;
             default:
@@ -246,7 +243,7 @@ void creerMaze(Jeu* jeu){
     int start = setStart(jeu->maze,jeu->sizeMaze);
     jeu->maze[ start ][ 0 ] = PLAYER;
     afficherMatrice1(jeu->maze,jeu->sizeMaze);  
-    afficherMatrice2(jeu->maze,jeu->sizeMaze);  
+    // afficherMatrice2(jeu->maze,jeu->sizeMaze);  
 
     jeu->arbreChemin = creerArbreChemins(NULL, start , 0 , jeu->maze);
     jeu->j.positions[0] = start;
