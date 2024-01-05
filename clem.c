@@ -180,13 +180,13 @@ void filAriane(Jeu* jeu){
 
 void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
     if((*maze)[positionL][positionsC] == EVENT){
-        int precEvent =0;
+        int precEvent =-1;
         int randomEvent;
         // pas remettre l'inversion clavier si on l'a pas enlever avant
         do{
-            randomEvent = rand() % 6;
-        }while (precEvent);
-        
+            randomEvent = rand() % 5;
+        }while (precEvent==randomEvent);
+        precEvent = randomEvent;
         switch (randomEvent) {
             case 0:
                 healthPotionEvent(jeu);
@@ -195,17 +195,17 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
                 damageTrapEvent(jeu);
                 break;
             case 2:
-                // filAriane(jeu);
-                break;
-            case 3:
                 neverGonnaGiveUP();
                 break;
-            case 4:
+            case 3:
                 inversion=1;
                 precEvent=1;
                 break;
-            case 5:
+            case 4:
                 inversion=0;
+                break;
+            case 5:
+                // filAriane(jeu);
                 break;
             default:
                 printf("Error Event Switch Case\n");
