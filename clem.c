@@ -19,58 +19,64 @@ arbreChemins creerArbreChemins(arbreChemins a, int positionL, int positionC,  in
 
 
 arbreChemins creerArbreCheminsCache(arbreChemins a, int positionL, int positionC,  int** maze,arbreChemins a_parent,int taille){
-        a = malloc(sizeof(node));
-        a->fils = malloc(1 * sizeof(node*));
-        a->positions[0] = positionL;
-        a->positions[1] = positionC;
-        a->parent = a_parent;
-        a->nbFils = 0;
-        //afficherMatrice(maze, SIZE);
-        if(maze[a->positions[0]][a->positions[1]] == END){
-            a->type = 0;
-        }else{
-            a->type = 1;
-        }
-        
-        if(positionC != taille-1){
-            if(maze[a->positions[0]][a->positions[1]+1] >= SPACE && (a->positions[0] != a->parent->positions[0] || a->positions[1]+1 != a->parent->positions[1])){ //DROITE
-                a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL, positionC+1,maze,a,taille);
-                a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
-                a->nbFils++;
+        if (a == NULL){
+            a = malloc(sizeof(node));
+            a->fils = malloc(1 * sizeof(node*));
+            a->positions[0] = positionL;
+            a->positions[1] = positionC;
+            a->parent = a_parent;
+            a->nbFils = 0;
+            // printf("%d - %d\n",positionL,positionC);
+            //afficherMatrice(maze, SIZE);
+            if(maze[a->positions[0]][a->positions[1]] == END){
+                a->type = 0;
+            }else{
+                a->type = 1;
             }
-
-        }
-        if(positionL != taille-1){
-            if(maze[a->positions[0]+1][a->positions[1]] >= SPACE && (a->positions[0]+1 != a->parent->positions[0] || a->positions[1] != a->parent->positions[1])){ // BAS
-                a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL+1, positionC,maze,a,taille);
-                a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
-                a->nbFils++;
             
-            }
-        }
-
-        if(positionL != 0){
-            if(maze[a->positions[0]-1][a->positions[1]] >= SPACE && (a->positions[0]-1 != a->parent->positions[0] || a->positions[1] != a->parent->positions[1])){ //HAUT
-                a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL-1, positionC,maze,a,taille);
-                a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
-                a->nbFils++;
+            if(positionC != taille-1){
+                if(maze[a->positions[0]][a->positions[1]+1] >= SPACE && (a->positions[0] != a->parent->positions[0] || a->positions[1]+1 != a->parent->positions[1])){ //DROITE
+                    a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL, positionC+1,maze,a,taille);
+                    a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
+                    a->nbFils++;
+                }
 
             }
-        }
+            if(positionL != taille-1){
+                if(maze[a->positions[0]+1][a->positions[1]] >= SPACE && (a->positions[0]+1 != a->parent->positions[0] || a->positions[1] != a->parent->positions[1])){ // BAS
+                    a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL+1, positionC,maze,a,taille);
+                    a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
+                    a->nbFils++;
+                
+                }
+            }
 
-        if(positionC != 0){
-            if(maze[a->positions[0]][a->positions[1]-1] >= SPACE && (a->positions[0] != a->parent->positions[0] || a->positions[1]-1 != a->parent->positions[1])){ //GAUCHE
-                a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL, positionC-1,maze,a,taille);
-                a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
-                a->nbFils++;
+            if(positionL != 0){
+                if(maze[a->positions[0]-1][a->positions[1]] >= SPACE && (a->positions[0]-1 != a->parent->positions[0] || a->positions[1] != a->parent->positions[1])){ //HAUT
+                    a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL-1, positionC,maze,a,taille);
+                    a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
+                    a->nbFils++;
+
+                }
+            }
+
+            if(positionC != 0){
+                if(maze[a->positions[0]][a->positions[1]-1] >= SPACE && (a->positions[0] != a->parent->positions[0] || a->positions[1]-1 != a->parent->positions[1])){ //GAUCHE
+                    a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL, positionC-1,maze,a,taille);
+                    a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
+                    a->nbFils++;
+                    return a;
+                }
                 return a;
+
+
             }
+            
             return a;
-
-
+        }else{
+            printf("test");
+            return a;
         }
-        
-        return a;
     }
     //int usleep(useconds_t usec);
 
@@ -139,17 +145,55 @@ void milkPotionEvent(Jeu* jeu){
 
 }
 
+int verifUsePiocheEvent(int*** maze, arbreChemins* arbre, int lPioche, int cPioche,int taille){
+    if(lPioche == 0 || cPioche == 0 || lPioche == taille || cPioche == taille){
+        return 1;
+    }else{
+        if((*maze)[lPioche][cPioche] == WALL){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
+}
+
+void usePiocheEvent(Jeu* jeu){
+    int lPioche = jeu->j.positions[0];
+    int cPioche = jeu->j.positions[1];
+    do{
+        switch (deplacementTouche(jeu->j.etatSobreJoueur)){
+            case HAUT:
+                lPioche--;
+                break;
+            case BAS:
+                lPioche++;
+                break;
+            case DROITE:
+                cPioche++;
+                break;
+            case GAUCHE:
+                lPioche--;
+                break;
+        }
+    }while(verifUsePiocheEvent(&jeu->maze,&jeu->arbreChemin,lPioche,cPioche,jeu->sizeMaze));
+
+    jeu->maze[lPioche][cPioche] = SPACE;
+    jeu->arbreChemin = creerArbreChemins(NULL,jeu->j.positions[0],jeu->j.positions[1], jeu->mazeSansEvent, jeu->sizeMaze);
+
+}
+
+
 
 void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
     if((*maze)[positionL][positionsC] == EVENT){
         int precEvent =-1;
-        int randomEvent;
+        int randomEvent = 8;
         usleep(5000);
         // pas remettre l'inversion clavier si on l'a pas enlever avant
-        do{
-            randomEvent = (rand() % 7)+1; // entre random entre 1 et 7
-        }while (precEvent==randomEvent);
-        precEvent = randomEvent;
+        // do{
+        //     randomEvent = (rand() % 7)+1; // entre random entre 1 et 7
+        // }while (precEvent==randomEvent);
+        // precEvent = randomEvent;
         switch (randomEvent) {
             case HEALTH:
                 healthPotionEvent(jeu);
@@ -159,8 +203,7 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
                 break;
             case FIRE:
                 jeu->j.etatDangerJoueur = ETAT_FEU;
-                jeu->j.etatTourRestants = jeu->j.etatTourRestants + 3;
-                //neverGonnaGiveUP();
+                jeu->j.etatTourRestants = jeu->j.etatTourRestants + (1+(jeu->level/4));
                 break;
             case DRUNK:
                 jeu->j.etatSobreJoueur=ETAT_DRUNK;
@@ -174,10 +217,13 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
                 break;
             case POISON:
                 jeu->j.etatDangerJoueur = ETAT_POISON;
-                jeu->j.etatTourRestants = jeu->j.etatTourRestants + 5;
+                jeu->j.etatTourRestants = jeu->j.etatTourRestants + (2+(jeu->level/4));
+                break;
+            case PIOCHE:
+                ajouterItemInventaire(jeu,PIOCHE,"Pickaxe");
                 break;
             case FUN:
-
+                //neverGonnaGiveUP();
                 break;
 
             default:
@@ -206,6 +252,8 @@ char* emoji(int type){
             return "🧶 ";
         case POISON: 
             return "🧪 ";
+        case PIOCHE:
+            return "⛏️ ";
         case FUN: 
             return "🎷 ";
         default:
@@ -221,10 +269,7 @@ void afficherUseItem(int type){
 
 
 void afficherScore(Jeu jeu){
-   // int vraiLvl = 1;
-   //if(jeu.level!=0){
-    //   vraiLvl=vraiLvl+(jeu.level/2);
-    //}
+
 printf("\e[1;97m");
 printf("╔═══════════════════╗\n");
 printf("║   Niveau lvl: %d   ║\n",(jeu.level/2)+1);
@@ -249,6 +294,8 @@ void useItem(Jeu* jeu, int typeInput){
             jeu->j.etatSobreJoueur = ETAT_NORMAL;
             jeu->j.etatDangerJoueur = ETAT_NON_DANGER;
             break;
+        case PIOCHE:
+            usePiocheEvent(jeu);
         default:
             break;
     }
@@ -280,8 +327,9 @@ void mazePlacement(int*** maze,int taille,Joueur* j){
 void creerMaze(Jeu* jeu){
     jeu->sizeMaze = jeu->sizeMaze + jeu->level;
     mazeGenerator(&jeu->maze,jeu->sizeMaze);
-    mazePlacement(&jeu->maze,jeu->sizeMaze,&jeu->j); 
-
+    allouerTab2(&jeu->mazeSansEvent,jeu->sizeMaze);
+    jeu->mazeSansEvent = jeu->maze;
+    mazePlacement(&jeu->maze,jeu->sizeMaze,&jeu->j);
     //afficherMatrice1(jeu->maze,jeu->sizeMaze);  
     // afficherMatrice2(jeu->maze,jeu->sizeMaze);  
 

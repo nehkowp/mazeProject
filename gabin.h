@@ -25,6 +25,6 @@ void mazeGenerator(int*** maze,int taille);
 void ajouter_pile( const int colonne, const int ligne, int** cStack, int** rStack, int *index );
 void retirer_pile( const int colonne, const int ligne, int** cStack, int** rStack, int *index );
 void setValues( int values[][ VALUES ], int colonne, int ligne, int taille);
-
+void allouerTab2(int*** maze,int taille);
 
 #endif
