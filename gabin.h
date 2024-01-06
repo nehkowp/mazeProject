@@ -2,6 +2,7 @@
 #define GABIN_H
 
 
+#include "structure.h"
 #define WALL 0
 #define SPACE 1
 #define EVENT 5
@@ -18,8 +19,8 @@ int** genererMatrice(int n);
 void genererChemin(int** matrice, int taille);
 int mainGabin();
 
-int setStart( int** matrice, int taille );
-void setEnd( int*** maze, int taille );
+void setStart( int*** matrice, int taille , int randPlacement,Joueur* j);
+void setEnd( int*** maze, int taille, int randPlacement);
 void mazeGenerator(int*** maze,int taille);
 void ajouter_pile( const int colonne, const int ligne, int** cStack, int** rStack, int *index );
 void retirer_pile( const int colonne, const int ligne, int** cStack, int** rStack, int *index );

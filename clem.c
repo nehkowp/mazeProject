@@ -8,17 +8,17 @@
 #include <time.h>
 
 
-arbreChemins creerArbreChemins(arbreChemins a, int positionL, int positionC,  int** maze){
+arbreChemins creerArbreChemins(arbreChemins a, int positionL, int positionC,  int** maze,int taille){
     arbreChemins a_parent;
     a_parent = malloc(sizeof(node));
     a_parent->nbFils = 1;
     a_parent->positions[0] = positionL;
     a_parent->positions[1] = positionC;
-    return creerArbreCheminsCache(a,positionL,positionC,maze,a_parent);
+    return creerArbreCheminsCache(a,positionL,positionC,maze,a_parent,taille);
 }
 
 
-arbreChemins creerArbreCheminsCache(arbreChemins a, int positionL, int positionC,  int** maze,arbreChemins a_parent){
+arbreChemins creerArbreCheminsCache(arbreChemins a, int positionL, int positionC,  int** maze,arbreChemins a_parent,int taille){
         a = malloc(sizeof(node));
         a->fils = malloc(1 * sizeof(node*));
         a->positions[0] = positionL;
@@ -31,31 +31,36 @@ arbreChemins creerArbreCheminsCache(arbreChemins a, int positionL, int positionC
         }else{
             a->type = 1;
         }
-
-        if(maze[a->positions[0]][a->positions[1]+1] >= SPACE && (a->positions[0] != a->parent->positions[0] || a->positions[1]+1 != a->parent->positions[1])){ //DROITE
-            a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL, positionC+1,maze,a);
-            a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
-            a->nbFils++;
+        
+        if(positionC != taille-1){
+            if(maze[a->positions[0]][a->positions[1]+1] >= SPACE && (a->positions[0] != a->parent->positions[0] || a->positions[1]+1 != a->parent->positions[1])){ //DROITE
+                a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL, positionC+1,maze,a,taille);
+                a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
+                a->nbFils++;
+            }
 
         }
-        if(maze[a->positions[0]+1][a->positions[1]] >= SPACE && (a->positions[0]+1 != a->parent->positions[0] || a->positions[1] != a->parent->positions[1])){ // BAS
-            a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL+1, positionC,maze,a);
-            a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
-            a->nbFils++;
+        if(positionL != taille-1){
+            if(maze[a->positions[0]+1][a->positions[1]] >= SPACE && (a->positions[0]+1 != a->parent->positions[0] || a->positions[1] != a->parent->positions[1])){ // BAS
+                a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL+1, positionC,maze,a,taille);
+                a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
+                a->nbFils++;
             
+            }
         }
 
+        if(positionL != 0){
+            if(maze[a->positions[0]-1][a->positions[1]] >= SPACE && (a->positions[0]-1 != a->parent->positions[0] || a->positions[1] != a->parent->positions[1])){ //HAUT
+                a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL-1, positionC,maze,a,taille);
+                a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
+                a->nbFils++;
 
-        if(maze[a->positions[0]-1][a->positions[1]] >= SPACE && (a->positions[0]-1 != a->parent->positions[0] || a->positions[1] != a->parent->positions[1])){ //HAUT
-            a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL-1, positionC,maze,a);
-            a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
-            a->nbFils++;
-
+            }
         }
 
         if(positionC != 0){
             if(maze[a->positions[0]][a->positions[1]-1] >= SPACE && (a->positions[0] != a->parent->positions[0] || a->positions[1]-1 != a->parent->positions[1])){ //GAUCHE
-                a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL, positionC-1,maze,a);
+                a->fils[a->nbFils] = creerArbreCheminsCache(a->fils[a->nbFils],positionL, positionC-1,maze,a,taille);
                 a->fils = realloc(a->fils,(a->nbFils+1) * sizeof(node*));
                 a->nbFils++;
                 return a;
@@ -234,18 +239,24 @@ void initJeu(Jeu* jeu){
     srand(time(NULL));
 }
 
+void mazePlacement(int*** maze,int taille,Joueur* j){
+    int randPlacement = rand() % 4; // 0 1 2 3
+
+    setEnd(maze,taille,randPlacement);
+    setStart(maze,taille,randPlacement,j);
+
+}
+
 void creerMaze(Jeu* jeu){
     jeu->sizeMaze = jeu->sizeMaze + jeu->level;
-    mazeGenerator(&jeu->maze,jeu->sizeMaze); 
-    setEnd(&jeu->maze,jeu->sizeMaze);
-    int start = setStart(jeu->maze,jeu->sizeMaze);
-    jeu->maze[ start ][ 0 ] = PLAYER;
-    afficherMatrice1(jeu->maze,jeu->sizeMaze);  
+    mazeGenerator(&jeu->maze,jeu->sizeMaze);
+    mazePlacement(&jeu->maze,jeu->sizeMaze,&jeu->j); 
+
+    //afficherMatrice1(jeu->maze,jeu->sizeMaze);  
     // afficherMatrice2(jeu->maze,jeu->sizeMaze);  
 
-    jeu->arbreChemin = creerArbreChemins(NULL, start , 0 , jeu->maze);
-    jeu->j.positions[0] = start;
-    jeu->j.positions[1] = 0;
+    jeu->arbreChemin = creerArbreChemins(NULL, jeu->j.positions[0] , jeu->j.positions[1] , jeu->maze,jeu->sizeMaze);
+
 }
 
 void placerEvents(Jeu* jeu){

@@ -4,31 +4,101 @@
 #include <time.h>
 #include <unistd.h>
 #include "clem.h"
+#include "structure.h"
 
 
     // Choisir une ligne de départ aléatoire dans la première colonne
-int setStart( int** maze, int taille ) {
+void setStart( int*** maze, int taille , int randPlacement, Joueur* j) {
     int random = 0;
     random = 1 + rand() % ( taille - 2 );
     // Vérifier que la case choisie est vide (pas un mur)
-    while ( maze[ random ][ 1 ] != SPACE ) {
+    while ( (*maze)[ random ][ 1 ] != SPACE ) {
         random = 1 + rand() % ( taille - 2 );
     }
     // Marquer la case de départ dans la matrice et la retourner
-    maze[ random ][ 0 ] = START;
-    return random;
+    switch (randPlacement) {
+        case 2:
+                while ( (*maze)[ random ][ 1 ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ random ][ 0 ] = START;
+                j->positions[0] = random;
+                j->positions[1] = 0;
+            break;
+        case 3:
+            while ( (*maze)[ taille - 2  ][ random ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ taille - 1 ][ random ] = START;
+                j->positions[0] = taille-1;
+                j->positions[1] = random;
+            break;
+        case 0:
+                while ( (*maze)[ random ][ taille - 2 ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ random ][ taille - 1 ] = START;
+                j->positions[0] = random;
+                j->positions[1] = taille-1;   
+            break;
+        case 1:
+            while ( (*maze)[ 1 ][ random ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ 0 ][ random ] = START;
+                j->positions[0] = 0;
+                j->positions[1] = random;
+            break;
+        default:
+            break;
+    
+    }
+    (*maze)[ j->positions[0] ][ j->positions[1] ] = PLAYER;
 }
 
-void setEnd(int*** maze, int taille) {
+void setEnd(int*** maze, int taille,int randPlacement) {
     int random = 0;    
     // Choisir une ligne de fin aléatoire dans la dernière colonne
     random = 1 + rand() % ( taille - 2 );
-    // Vérifier que la case choisie est vide (pas un mur)
-    while ( (*maze)[ random ][ taille - 2 ] != SPACE ) {
-        random = 1 + rand() % ( taille - 2 );
+    switch (randPlacement) {
+        case 0:
+                while ( (*maze)[ random ][ 1 ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ random ][ 0 ] = END;
+            break;
+        case 1:
+            while ( (*maze)[ taille - 2  ][ random ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ taille - 1 ][ random ] = END;
+            break;
+        case 2:
+                while ( (*maze)[ random ][ taille - 2 ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ random ][ taille - 1 ] = END;    
+            break;
+        case 3:
+            while ( (*maze)[ 1 ][ random ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ 0 ][ random ] = END;
+            break;
+        default:
+            break;
+    
     }
-    // Marquer la case de fin dans la matrice
-    (*maze)[ random ][ taille - 1 ] = END;
+    // Vérifier que la case choisie est vide (pas un mur)
+
 }
 
 
