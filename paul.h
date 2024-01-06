@@ -15,7 +15,7 @@ extern int inversion;
 
 #include <stdio.h>
 void emptyBuffer();
-char deplacementTouche();
+char deplacementTouche(int etatJoueur);
 
 
 #endif

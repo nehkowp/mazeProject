@@ -3,9 +3,9 @@
 
 #include "stdio.h"
 
-typedef enum {NONE,HEALTH,DAMAGE,FUN,DRUNK,MILK,ARIANE}itemListe;
-
-
+typedef enum {NONE,HEALTH,DAMAGE,FIRE,DRUNK,MILK,ARIANE,POISON,FUN}itemListe;
+typedef enum {ETAT_NORMAL,ETAT_DRUNK}etatListe;
+typedef enum {ETAT_NON_DANGER,ETAT_FEU,ETAT_POISON}lifeListe;
 typedef struct coords{
     int positions[2];
     struct coords* suivant;
@@ -21,6 +21,9 @@ struct Joueur{
     int pvHealth;
     Item* inventaire;
     int positions[2];
+    int etatSobreJoueur;
+    int etatDangerJoueur; 
+    int etatTourRestants;
 };
 typedef struct Joueur Joueur;
 
@@ -34,7 +37,7 @@ typedef struct node {
 typedef node* arbreChemins;
 
 struct Jeu{
-    int typeLastEvent; // NONE = 0 else afficher use item
+    int typeEvent; // NONE = 0 else afficher use item
     Joueur j;
     int level;
     int sizeMaze;

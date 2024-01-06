@@ -111,6 +111,12 @@ void ajouterItemInventaire(Jeu* jeu, int type, char* name){
     jeu->j.inventaire[nbItems].name = name;
 }
 
+void neverGonnaGiveUP(){
+    system("xdg-open https://www.youtube.com/watch?v=dQw4w9WgXcQ &");
+    system("sleep 2");
+    system("clear");     
+}
+
 void healthPotionEvent(Jeu* jeu){
     if(jeu->j.pvHealth > 9){
         ajouterItemInventaire(jeu,HEALTH,"Health Potion");
@@ -123,10 +129,14 @@ void damageTrapEvent(Jeu* jeu){
     jeu->j.pvHealth--;
 }
 
-void neverGonnaGiveUP(){
-    system("xdg-open https://www.youtube.com/watch?v=dQw4w9WgXcQ &");
-    system("sleep 2");
-    system("clear");     
+
+void milkPotionEvent(Jeu* jeu){
+    if(jeu->j.etatSobreJoueur){
+        jeu->j.etatSobreJoueur=0;
+    }else{
+        ajouterItemInventaire(jeu,MILK,"Milk Potion");
+    }
+
 }
 
 
@@ -134,9 +144,10 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
     if((*maze)[positionL][positionsC] == EVENT){
         int precEvent =-1;
         int randomEvent;
+        usleep(5000);
         // pas remettre l'inversion clavier si on l'a pas enlever avant
         do{
-            randomEvent = (rand() % 5)+1; // entre random entre 1 et 6
+            randomEvent = (rand() % 7)+1; // entre random entre 1 et 7
         }while (precEvent==randomEvent);
         precEvent = randomEvent;
         switch (randomEvent) {
@@ -146,24 +157,34 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
             case DAMAGE:
                 damageTrapEvent(jeu);
                 break;
-            case FUN:
+            case FIRE:
+                jeu->j.etatDangerJoueur = ETAT_FEU;
+                jeu->j.etatTourRestants = jeu->j.etatTourRestants + 3;
                 //neverGonnaGiveUP();
                 break;
             case DRUNK:
-                inversion=1;
+                jeu->j.etatSobreJoueur=ETAT_DRUNK;
                 precEvent=1;
                 break;
             case MILK:
-                inversion=0;
+                milkPotionEvent(jeu);
                 break;
             case ARIANE:
                 // filAriane(jeu);
                 break;
+            case POISON:
+                jeu->j.etatDangerJoueur = ETAT_POISON;
+                jeu->j.etatTourRestants = jeu->j.etatTourRestants + 5;
+                break;
+            case FUN:
+
+                break;
+
             default:
                 printf("Error Event Switch Case\n");
                 break;
         }
-        jeu->typeLastEvent = randomEvent;
+        jeu->typeEvent = randomEvent;
     }
 }
 
@@ -174,13 +195,19 @@ char* emoji(int type){
         case HEALTH:
             return "💊 ";
         case DAMAGE:
-            return "💔 ";
-        case FUN:
+            return "🤕 ";
+        case FIRE:
             return "🔥 ";
         case DRUNK:
             return "🍾 ";
         case MILK:
             return "🥛 ";
+        case ARIANE:
+            return "🧶 ";
+        case POISON: 
+            return "🧪 ";
+        case FUN: 
+            return "🎷 ";
         default:
             return "Error";
     }
@@ -188,8 +215,7 @@ char* emoji(int type){
 
 void afficherUseItem(int type){
     printf("╔═══════════════════════╗\n");
-    printf("║ Labyrinthe utilise %s║\n",emoji(type));
-    printf("║ (c'est très efficace) ║\n");
+    printf("║ Vous avez utilisé %s ║\n",emoji(type));
     printf("╚═══════════════════════╝\n");
 }
 
@@ -219,6 +245,10 @@ void useItem(Jeu* jeu, int typeInput){
         case HEALTH:
             jeu->j.pvHealth++;
             break;
+        case MILK:
+            jeu->j.etatSobreJoueur = ETAT_NORMAL;
+            jeu->j.etatDangerJoueur = ETAT_NON_DANGER;
+            break;
         default:
             break;
     }
@@ -229,7 +259,7 @@ void initJeu(Jeu* jeu){
     jeu->level = 0;
     jeu->sizeMaze = INITIALSIZE;
     jeu->j.pvHealth = 10;
-    jeu->typeLastEvent = NONE;
+    jeu->typeEvent = NONE;
     jeu->j.inventaire = malloc(5*sizeof(Item)); //5 items max
     for(int nbItems = 0;nbItems < 5; nbItems++){
         jeu->j.inventaire[nbItems].type = NONE;
@@ -273,7 +303,7 @@ void placerEvents(Jeu* jeu){
 }
 
 void deplacementMaze(Jeu* jeu,arbreChemins* a,int*** maze,int positions[2]){
-    switch (deplacementTouche()) {
+    switch (deplacementTouche(jeu->j.etatSobreJoueur)) {
                 case HAUT:
                     if(deplacementValide(positions[0]-1,positions[1],a)){
                         verifEvent(jeu,maze,positions[0]-1,positions[1]);

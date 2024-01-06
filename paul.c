@@ -12,7 +12,7 @@ void emptyBuffer() {
   while (((c = getchar()) != '\n') && (c != EOF));
 }
 
-char deplacementTouche(){
+char deplacementTouche(int etatJoueur){
   struct termios tty_opts_backup, tty_opts_raw;
   char c;
   int pastermine=1;//par défaut on le met à vrai
@@ -32,7 +32,7 @@ char deplacementTouche(){
   while (pastermine) {
     // ZQSD
     c = getchar();
-    if (inversion == 1) {
+    if (etatJoueur == 1) {
       switch (c) {
         case HAUT:
           c = BAS;

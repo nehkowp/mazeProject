@@ -15,16 +15,33 @@ int main(){
     while(jeu.level < 30){
         creerMaze(&jeu);
         placerEvents(&jeu);
-        while(jeu.arbreChemin->type) {
+        while(jeu.arbreChemin->type && jeu.j.pvHealth > 0) {
             system("clear");
             afficherScore(jeu);
             afficherMatrice1(jeu.maze,jeu.sizeMaze);
             // afficherMatrice2(jeu.maze,jeu.sizeMaze);
             afficherInventaire(jeu);
-            if(jeu.typeLastEvent != NONE){
-                afficherUseItem(jeu.typeLastEvent);
-                jeu.typeLastEvent = NONE;
+            if(jeu.typeEvent != NONE && jeu.j.etatDangerJoueur == ETAT_NON_DANGER){
+                afficherUseItem(jeu.typeEvent);
+                printf("%d",jeu.typeEvent);
+                jeu.typeEvent = NONE;
             }
+            if(jeu.j.etatTourRestants == 0){
+                jeu.j.etatDangerJoueur = ETAT_NORMAL;
+            }
+            if(jeu.j.etatDangerJoueur != ETAT_NON_DANGER){
+                if(jeu.j.etatDangerJoueur == ETAT_POISON){
+                    afficherUseItem(POISON);
+                    jeu.j.pvHealth--;
+                    jeu.j.etatTourRestants--;
+                }
+                if(jeu.j.etatDangerJoueur == ETAT_FEU){
+                    jeu.j.pvHealth--;
+                    afficherUseItem(FIRE);
+                    jeu.j.etatTourRestants--;
+                }
+            }
+
             deplacementMaze(&jeu,&jeu.arbreChemin,&jeu.maze,jeu.j.positions);
             }
         free(jeu.maze);
