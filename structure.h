@@ -34,6 +34,7 @@ typedef struct node {
 typedef node* arbreChemins;
 
 struct Jeu{
+    int typeLastEvent; // NONE = 0 else afficher use item
     Joueur j;
     int level;
     int sizeMaze;

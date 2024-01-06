@@ -19,4 +19,5 @@ void afficherArbreChemins(arbreChemins a,int** maze);
 int deplacementValide(int positionL, int positionC, arbreChemins* a);
 void deplacementMaze(Jeu* jeu,arbreChemins* a,int*** maze, int positions[2]);
 char* affichageMur(int** maze, int ligne, int colonne, int taille);
+void afficherUseItem(int type);
 #endif

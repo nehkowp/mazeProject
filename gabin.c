@@ -42,7 +42,7 @@ void afficherMatrice1(int** matrice , int n) {
                     printf("  "); // Espace vide
                     break;
                 case WALL:
-                    printf("🟩"); // Mur
+                    printf("🧱"); // Mur
                     break;
                 case PLAYER:
                     printf("👾"); // Joueur

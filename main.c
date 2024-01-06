@@ -21,6 +21,10 @@ int main(){
             afficherMatrice1(jeu.maze,jeu.sizeMaze);
             // afficherMatrice2(jeu.maze,jeu.sizeMaze);
             afficherInventaire(jeu);
+            if(jeu.typeLastEvent != NONE){
+                afficherUseItem(jeu.typeLastEvent);
+                jeu.typeLastEvent = NONE;
+            }
             deplacementMaze(&jeu,&jeu.arbreChemin,&jeu.maze,jeu.j.positions);
             }
         free(jeu.maze);

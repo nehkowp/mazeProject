@@ -181,33 +181,34 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
         int randomEvent;
         // pas remettre l'inversion clavier si on l'a pas enlever avant
         do{
-            randomEvent = rand() % 5;
+            randomEvent = (rand() % 5)+1; // entre random entre 1 et 6
         }while (precEvent==randomEvent);
         precEvent = randomEvent;
         switch (randomEvent) {
-            case 0:
+            case HEALTH:
                 healthPotionEvent(jeu);
                 break;
-            case 1:
+            case DAMAGE:
                 damageTrapEvent(jeu);
                 break;
-            case 2:
-                neverGonnaGiveUP();
+            case FUN:
+                //neverGonnaGiveUP();
                 break;
-            case 3:
+            case DRUNK:
                 inversion=1;
                 precEvent=1;
                 break;
-            case 4:
+            case MILK:
                 inversion=0;
                 break;
-            case 5:
+            case ARIANE:
                 // filAriane(jeu);
                 break;
             default:
                 printf("Error Event Switch Case\n");
                 break;
         }
+        jeu->typeLastEvent = randomEvent;
     }
 }
 
@@ -217,6 +218,8 @@ char* emoji(int type){
             return " - ";
         case HEALTH:
             return "💊 ";
+        case DAMAGE:
+            return "💔 ";
         case FUN:
             return "🔥 ";
         case DRUNK:
@@ -228,6 +231,14 @@ char* emoji(int type){
     }
 }
 
+void afficherUseItem(int type){
+    printf("╔═══════════════════════╗\n");
+    printf("║ Labyrinthe utilise %s║\n",emoji(type));
+    printf("║ (c'est très efficace) ║\n");
+    printf("╚═══════════════════════╝\n");
+}
+
+
 void afficherScore(Jeu jeu){
    // int vraiLvl = 1;
    //if(jeu.level!=0){
@@ -235,7 +246,7 @@ void afficherScore(Jeu jeu){
     //}
 printf("\e[1;97m");
 printf("╔═══════════════════╗\n");
-printf("║   Niveau lvl: %d   ║\n",jeu.level);
+printf("║   Niveau lvl: %d   ║\n",(jeu.level/2)+1);
 printf("╚═══════════════════╝\n");
 printf("\e[0m");
 }
@@ -263,6 +274,7 @@ void initJeu(Jeu* jeu){
     jeu->level = 0;
     jeu->sizeMaze = INITIALSIZE;
     jeu->j.pvHealth = 10;
+    jeu->typeLastEvent = NONE;
     jeu->j.inventaire = malloc(5*sizeof(Item)); //5 items max
     for(int nbItems = 0;nbItems < 5; nbItems++){
         jeu->j.inventaire[nbItems].type = NONE;
