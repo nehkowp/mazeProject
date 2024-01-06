@@ -124,56 +124,6 @@ void neverGonnaGiveUP(){
     system("clear");     
 }
 
-CoordsStack creerCord(int positionL, int positionC){
-    CoordsStack nvElt;
-    nvElt  = malloc(sizeof(coords)*1);
-    nvElt->positions[0] = positionL;
-    nvElt->positions[1] = positionC;
-    return nvElt;
-}
-
-CoordsStack ajouterCoord(CoordsStack p, int positionL, int positionC){
-    CoordsStack nvElt;
-    nvElt =  creerCord(positionL, positionC);
-
-    if (p==NULL){
-        p = nvElt;
-    }else{
-        nvElt->suivant = p;
-        p = nvElt;
-    }
-    return p;
-}
-
-CoordsStack cheminAriane(arbreChemins arbre,CoordsStack coords){
-    coords = ajouterCoord(coords,arbre->positions[0],arbre->positions[1]);
-    printf("[%d - %d]\n",coords->positions[0],coords->positions[1]);
-    if(arbre->type){
-        return coords;
-    }else{
-        for(int nbFils = 0; nbFils < arbre->nbFils; nbFils++){
-            coords->suivant = cheminAriane(arbre->fils[nbFils],coords);
-
-        }
-        coords->suivant = cheminAriane(arbre->parent,coords);
-    }
-    return NULL;
-}
-
-void filAriane(Jeu* jeu){
-    CoordsStack ariane = cheminAriane(jeu->arbreChemin,NULL);
-    while(ariane != NULL){
-        printf("[%d - %d]\n",ariane->positions[0],ariane->positions[1]);
-        printf("[%d - %d]\n",ariane->suivant->positions[0],ariane->suivant->positions[1]);
-        // printf("[%d - %d]\n",ariane->positions[0],ariane->positions[1]);
-
-        CoordsStack avantDernier = ariane->suivant;
-        ariane = avantDernier;
-    }
-    sleep(1);
-}
-
-
 
 void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
     if((*maze)[positionL][positionsC] == EVENT){
