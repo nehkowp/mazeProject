@@ -17,6 +17,7 @@ int main(){
         placerEvents(&jeu);
         while(jeu.arbreChemin->type) {
             system("clear");
+            afficherScore(jeu);
             afficherMatrice1(jeu.maze,jeu.sizeMaze);
             // afficherMatrice2(jeu.maze,jeu.sizeMaze);
             afficherInventaire(jeu);
@@ -24,6 +25,6 @@ int main(){
             }
         free(jeu.maze);
         free(jeu.arbreChemin);
-        jeu.level = jeu.level+2;
+        jeu.level=jeu.level+2;
     }
 }

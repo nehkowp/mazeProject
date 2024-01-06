@@ -2,6 +2,5 @@
 #define ETIENNE_H
 
 #include <stdio.h>
-void testEtienne();
 
 #endif

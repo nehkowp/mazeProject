@@ -5,9 +5,6 @@
 #include <unistd.h>
 #include "clem.h"
 
-void testGabin(){
-    printf("⬜⬜⬜⬜⬜\n");
-}
 
     // Choisir une ligne de départ aléatoire dans la première colonne
 int setStart( int** maze, int taille ) {

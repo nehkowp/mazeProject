@@ -7,9 +7,6 @@
 #include <unistd.h>
 #include <time.h>
 
-void testClem(){
-    printf("Bonjour c'est la fonction de Clem : ) \n");
-}
 
 arbreChemins creerArbreChemins(arbreChemins a, int positionL, int positionC,  int** maze){
     arbreChemins a_parent;
@@ -70,7 +67,7 @@ arbreChemins creerArbreCheminsCache(arbreChemins a, int positionL, int positionC
         
         return a;
     }
-    int usleep(useconds_t usec);
+    //int usleep(useconds_t usec);
 
 
 void afficherArbreChemins(arbreChemins a, int** maze){
@@ -229,6 +226,18 @@ char* emoji(int type){
         default:
             return "Error";
     }
+}
+
+void afficherScore(Jeu jeu){
+   // int vraiLvl = 1;
+   //if(jeu.level!=0){
+    //   vraiLvl=vraiLvl+(jeu.level/2);
+    //}
+printf("\e[1;97m");
+printf("╔═══════════════════╗\n");
+printf("║   Niveau lvl: %d   ║\n",jeu.level);
+printf("╚═══════════════════╝\n");
+printf("\e[0m");
 }
 
 void afficherInventaire(Jeu jeu){
