@@ -3,7 +3,7 @@
 
 #include "stdio.h"
 
-typedef enum {NONE,HEALTH,DAMAGE,FIRE,DRUNK,MILK,ARIANE,POISON,FUN}itemListe;
+typedef enum {NONE,HEALTH,DAMAGE,FIRE,DRUNK,MILK,ARIANE,POISON,SCORE,FUN}itemListe;
 typedef enum {ETAT_NORMAL,ETAT_DRUNK}etatListe;
 typedef enum {ETAT_NON_DANGER,ETAT_FEU,ETAT_POISON}lifeListe;
 typedef struct coords{
@@ -40,6 +40,7 @@ struct Jeu{
     int typeEvent; // NONE = 0 else afficher use item
     Joueur j;
     int level;
+    int score;
     int sizeMaze;
     int** maze;
     arbreChemins arbreChemin;

@@ -131,35 +131,6 @@ void afficherMatrice1(int** matrice , int n) {
         printf("\n");
     }
 }
-void afficherMatrice2(int** matrice , int n) {
-   // Afficher la matrice avec des symboles correspondant aux éléments
-   for(int i = 0; i < n; i++){
-        for(int j =0; j < n; j++){
-            switch (matrice[i][j]) {
-                case SPACE:
-                    printf("  "); // Espace vide
-                    break;
-                case WALL:
-                    printf("%s",affichageMur(matrice,i,j,n-1)); // Mur
-                    break;
-                case PLAYER:
-                    printf("# "); // Joueur
-                    break;
-                case END:
-                    printf("🏁"); //Point d'arrivée
-                    break;
-                case EVENT:
-                    printf("❔");
-                    break;
-                default:
-                    break; 
-            }
-
-        }
-        printf("\n");
-    }
-}
-
 
 void allouerTab1(int** tab, int taille){
     int n = (taille*taille);

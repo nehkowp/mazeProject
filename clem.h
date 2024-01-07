@@ -9,7 +9,7 @@ void testClem();
 void initJeu(Jeu* jeu);
 void creerMaze(Jeu* jeu);
 void placerEvents(Jeu* jeu);
-void afficherScore(Jeu jeu);
+void afficherScore(int score, int level);
 void afficherInventaire(Jeu jeu);
 char* emoji(int type);
 arbreChemins creerArbreChemins(arbreChemins a, int positionL , int positionC, int** maze,int taille);
@@ -18,6 +18,7 @@ arbreChemins creerArbreCheminsCache(arbreChemins a, int positionL, int positionC
 void afficherArbreChemins(arbreChemins a,int** maze);
 int deplacementValide(int positionL, int positionC, arbreChemins* a);
 void deplacementMaze(Jeu* jeu,arbreChemins* a,int*** maze, int positions[2]);
-char* affichageMur(int** maze, int ligne, int colonne, int taille);
 void afficherUseItem(int type);
+void gameOver(int level, int score);
+void eventJoueur(int* typeEvent,Joueur* j);
 #endif

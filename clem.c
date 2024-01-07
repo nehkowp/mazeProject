@@ -142,12 +142,13 @@ void milkPotionEvent(Jeu* jeu){
 
 void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
     if((*maze)[positionL][positionsC] == EVENT){
+        jeu->score = jeu->score + 25;
         int precEvent =-1;
         int randomEvent;
         usleep(5000);
         // pas remettre l'inversion clavier si on l'a pas enlever avant
         do{
-            randomEvent = (rand() % 7)+1; // entre random entre 1 et 7
+            randomEvent = (rand() % 8)+1; // entre random entre 1 et 8
         }while (precEvent==randomEvent);
         precEvent = randomEvent;
         switch (randomEvent) {
@@ -176,6 +177,8 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
                 jeu->j.etatDangerJoueur = ETAT_POISON;
                 jeu->j.etatTourRestants = jeu->j.etatTourRestants + 5;
                 break;
+            case SCORE:
+                jeu->score = jeu->score + 500;
             case FUN:
 
                 break;
@@ -206,6 +209,9 @@ char* emoji(int type){
             return "🧶 ";
         case POISON: 
             return "🧪 ";
+        case SCORE:
+            return "🪙 ";
+
         case FUN: 
             return "🎷 ";
         default:
@@ -218,17 +224,54 @@ void afficherUseItem(int type){
     printf("║ Vous avez utilisé %s ║\n",emoji(type));
     printf("╚═══════════════════════╝\n");
 }
+void eventJoueur(int* typeEvent,Joueur* j){
+    if(*typeEvent != NONE && j->etatDangerJoueur == ETAT_NON_DANGER){
+                afficherUseItem(*typeEvent);
+                *typeEvent = NONE;
+    }
+    if(j->etatTourRestants == 0){
+        j->etatDangerJoueur = ETAT_NORMAL;
+    }
+    if(j->etatDangerJoueur != ETAT_NON_DANGER){
+        if(j->etatDangerJoueur == ETAT_POISON){
+            afficherUseItem(POISON);
+            j->pvHealth--;
+            j->etatTourRestants--;
+        }
+        if(j->etatDangerJoueur == ETAT_FEU){
+            j->pvHealth--;
+            afficherUseItem(FIRE);
+            j->etatTourRestants--;
+        }
+    }
+}
 
 
-void afficherScore(Jeu jeu){
-   // int vraiLvl = 1;
-   //if(jeu.level!=0){
-    //   vraiLvl=vraiLvl+(jeu.level/2);
-    //}
+int lenInt(int score){
+    int len = 0;
+    if (score == 0){
+        len = 1;
+    }
+    while(score != 0){
+        score = score/10;
+        len++;
+    }
+    return len;
+}
+
+void scorePrint(int scoreLen){
+    while(scoreLen < 5){
+        printf(" ");
+        scoreLen++;
+    }
+    printf("    ║\n");
+}
+void afficherScore(int level,int score){
 printf("\e[1;97m");
-printf("╔═══════════════════╗\n");
-printf("║   Niveau lvl: %d   ║\n",(jeu.level/2)+1);
-printf("╚═══════════════════╝\n");
+printf("╔══════════════╗    ╔══════════════╗\n");
+printf("║   ""\e[1;92m""Niveau %d""\e[1;97m""   ║    ║   ""\e[1;33m""%d 🪙""\e[1;97m",(level/2)+1,score);
+scorePrint(lenInt(score));
+printf("╚══════════════╝    ╚══════════════╝\n");
 printf("\e[0m");
 }
 
@@ -257,8 +300,9 @@ void useItem(Jeu* jeu, int typeInput){
 
 void initJeu(Jeu* jeu){
     jeu->level = 0;
+    jeu->score = 0;
     jeu->sizeMaze = INITIALSIZE;
-    jeu->j.pvHealth = 10;
+    jeu->j.pvHealth = 5;
     jeu->typeEvent = NONE;
     jeu->j.inventaire = malloc(5*sizeof(Item)); //5 items max
     for(int nbItems = 0;nbItems < 5; nbItems++){
@@ -359,114 +403,26 @@ void deplacementMaze(Jeu* jeu,arbreChemins* a,int*** maze,int positions[2]){
             }
 }
 
+void gameOver(int level, int score){
+    system("clear");
+    afficherScore(level,score);
+    printf("\e[1;92m""⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⡀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣤⠀⠀⠀⢀⣴⣿⡶⠀⣾⣿⣿⡿⠟⠛⠁\n");
+    printf("⠀⠀⠀⠀⠀⠀⣀⣀⣄⣀⠀⠀⠀⠀⣶⣶⣦⠀⠀⠀⠀⣼⣿⣿⡇⠀⣠⣿⣿⣿⠇⣸⣿⣿⣧⣤⠀⠀⠀\n");
+    printf("⠀⠀⢀⣴⣾⣿⡿⠿⠿⠿⠇⠀⠀⣸⣿⣿⣿⡆⠀⠀⢰⣿⣿⣿⣷⣼⣿⣿⣿⡿⢀⣿⣿⡿⠟⠛⠁⠀⠀\n");
+    printf("⠀⣴⣿⡿⠋⠁⠀⠀⠀⠀⠀⠀⢠⣿⣿⣹⣿⣿⣿⣿⣿⣿⡏⢻⣿⣿⢿⣿⣿⠃⣼⣿⣯⣤⣴⣶⣿⡤⠀\n");
+    printf("⣼⣿⠏⠀⣀⣠⣤⣶⣾⣷⠄⣰⣿⣿⡿⠿⠻⣿⣯⣸⣿⡿⠀⠀⠀⠁⣾⣿⡏⢠⣿⣿⠿⠛⠋⠉⠀⠀⠀\n");
+    printf("⣿⣿⠲⢿⣿⣿⣿⣿⡿⠋⢰⣿⣿⠋⠀⠀⠀⢻⣿⣿⣿⠇⠀⠀⠀⠀⠙⠛⠀⠀⠉⠁⠀⠀⠀⠀⠀⠀⠀\n");
+    printf("⠹⢿⣷⣶⣿⣿⠿⠋⠀⠀⠈⠙⠃⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n");
+    printf("⠀⠀⠈⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣤⣴⣶⣦⣤⡀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀⠀⣠⡇⢰⣶⣶⣾⡿⠷⣿⣿⣿⡟⠛⣉⣿⣿⣿⠆\n");
+    printf("⠀⠀⠀⠀⠀⠀⢀⣤⣶⣿⣿⡎⣿⣿⣦⠀⠀⠀⢀⣤⣾⠟⢀⣿⣿⡟⣁⠀⠀⣸⣿⣿⣤⣾⣿⡿⠛⠁⠀\n");
+    printf("⠀⠀⠀⠀⣠⣾⣿⡿⠛⠉⢿⣦⠘⣿⣿⡆⠀⢠⣾⣿⠋⠀⣼⣿⣿⣿⠿⠷⢠⣿⣿⣿⠿⢻⣿⣧⠀⠀⠀\n");
+    printf("⠀⠀⠀⣴⣿⣿⠋⠀⠀⠀⢸⣿⣇⢹⣿⣷⣰⣿⣿⠃⠀⢠⣿⣿⢃⣀⣤⣤⣾⣿⡟⠀⠀⠀⢻⣿⣆⠀⠀\n");
+    printf("⠀⠀⠀⣿⣿⡇⠀⠀⢀⣴⣿⣿⡟⠀⣿⣿⣿⣿⠃⠀⠀⣾⣿⣿⡿⠿⠛⢛⣿⡟⠀⠀⠀⠀⠀⠻⠿⠀⠀\n");
+    printf("⠀⠀⠀⠹⣿⣿⣶⣾⣿⣿⣿⠟⠁⠀⠸⢿⣿⠇⠀⠀⠀⠛⠛⠁⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠈⠙⠛⠛⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n""\e[0m");
 
-char* affichageMur(int** maze, int ligne, int colonne,int taille){
-    if(ligne == 0){
-        if(colonne == 0){
-            return "╔═";
-        }else{
-            if(colonne == taille){
-                return "═╗";
-            }else{
-                if(maze[ligne+1][colonne] == WALL){
-                    return "╦═";
-                }else{
-                    return "══";
-                }
-            }
-        }
-    }
-    if(colonne == 0){
-        if(ligne == 0){
-            return "╔═";
-        }else{
-            if(ligne == taille){
-                return "╚═";
-            }else{
-                if(maze[ligne][colonne+1] == WALL){
-                    return "╠═";
-                }else{
-                return "║";
-                }
-            }
-        }
-    }
-    if(ligne == taille){
-        if(colonne == 0){
-            return "╚═";
-        }else{
-            if(colonne == taille){
-                return "═╝";
-            }else{
-                if(maze[ligne-1][colonne] == WALL){
-                    return "╩═";
-                }else{
-                    return "══";
-                }
-            }
-        }
-    }
-    if(colonne == taille){
-        if(ligne == 0){
-            return "═╗";
-        }else{
-            if(ligne == taille){
-                return "═╝";
-            }else{
-                if(maze[ligne][colonne-1] == WALL){
-                    return "═╣";
-                }else{
-                return " ║";
-                }
-            }
-        }
-    }
-    if(maze[ligne-1][colonne] == WALL && maze[ligne+1][colonne] == WALL && maze[ligne][colonne+1] == WALL && maze[ligne][colonne-1] == WALL){
-        return "╬═";
-    }
-    if(maze[ligne-1][colonne] == WALL && maze[ligne][colonne-1] == WALL && maze[ligne+1][colonne] == WALL){
-        return "═╣";
-    }
-    if(maze[ligne+1][colonne] == WALL && maze[ligne][colonne-1] == WALL && maze[ligne][colonne+1] == WALL){
-        return "╦═";
-    }
-    if(maze[ligne-1][colonne] == WALL && maze[ligne][colonne-1] == WALL && maze[ligne][colonne+1] == WALL){
-        return "╩═";
-    }
-    if(maze[ligne-1][colonne] == WALL && maze[ligne][colonne+1] == WALL && maze[ligne+1][colonne] == WALL){
-        return "╠═";
-    }
-    if(maze[ligne+1][colonne] == WALL && maze[ligne][colonne-1] == WALL){
-        return "═╗";
-    }
-    if(maze[ligne+1][colonne] == WALL && maze[ligne][colonne+1] == WALL){
-        return "╔═";
-    }
-    if(maze[ligne-1][colonne] == WALL && maze[ligne][colonne-1] == WALL){
-        return "═╝";
-    }
-    if(maze[ligne-1][colonne] == WALL && maze[ligne][colonne+1] == WALL){
-        return "╚═";
-    }
-    if(maze[ligne][colonne+1] == WALL && maze[ligne][colonne-1] == WALL){
-        return "══";
-    }
-    if(maze[ligne-1][colonne] == WALL && maze[ligne+1][colonne] == WALL){
-        return " ║";
-    }
-    if(maze[ligne+1][colonne] == WALL){
-        return " ║";
-    }
-    if(maze[ligne-1][colonne] == WALL){
-        return " ║";
-    }
-
-    if(maze[ligne][colonne+1] == WALL){
-        return "══";
-    }
-
-    if(maze[ligne][colonne-1] == WALL){
-        return "══";
-    }
-    return "🟩";
 }
+
+
