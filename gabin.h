@@ -14,6 +14,9 @@
 #define INITIALSIZE 7
 
 void afficherMatrice1(int** matrice , int taille);
+void allouerTab1(int** tab, int taille);
+void allouerTab2(int*** tab, int taille);
+
 void afficherMatrice2(int** matrice , int taille);
 int** genererMatrice(int n);
 void genererChemin(int** matrice, int taille);

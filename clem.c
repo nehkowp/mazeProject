@@ -269,7 +269,7 @@ void scorePrint(int scoreLen){
 void afficherScore(int level,int score){
 printf("\e[1;97m");
 printf("╔══════════════╗    ╔══════════════╗\n");
-printf("║   ""\e[1;92m""Niveau %d""\e[1;97m""   ║    ║   ""\e[1;33m""%d 🪙""\e[1;97m",(level/2)+1,score);
+printf("║   ""\e[1;92m""Niveau %d""\e[1;97m""   ║    ║  ""\e[1;33m""%d 🪙""\e[1;97m",(level/2)+1,score);
 scorePrint(lenInt(score));
 printf("╚══════════════╝    ╚══════════════╝\n");
 printf("\e[0m");

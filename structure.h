@@ -6,11 +6,14 @@
 typedef enum {NONE,HEALTH,DAMAGE,FIRE,DRUNK,MILK,ARIANE,POISON,SCORE,FUN}itemListe;
 typedef enum {ETAT_NORMAL,ETAT_DRUNK}etatListe;
 typedef enum {ETAT_NON_DANGER,ETAT_FEU,ETAT_POISON}lifeListe;
+
 typedef struct coords{
     int positions[2];
+    struct coords* precedent;
     struct coords* suivant;
 }coords;
 typedef coords* CoordsStack;
+
 struct Item{
     int quantite;
     int type;

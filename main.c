@@ -19,7 +19,7 @@ int main(){
             system("clear");
             afficherScore(jeu.level,jeu.score);
             afficherMatrice1(jeu.maze,jeu.sizeMaze);
-            afficherInventaire(jeu);     
+            afficherInventaire(jeu);
             eventJoueur(&jeu.typeEvent,&jeu.j);
             deplacementMaze(&jeu,&jeu.arbreChemin,&jeu.maze,jeu.j.positions);
             }
