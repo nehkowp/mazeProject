@@ -29,4 +29,6 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC);
 void eventJoueur(int* typeEvent,Joueur* j);
 void ajouterItemInventaire(Jeu* jeu, int type, char* name);
 int lenInt(int score);
+void getScoreCSV(Jeu* jeu);
+void saveScoreCSV(int oldscore,int newscore);
 #endif

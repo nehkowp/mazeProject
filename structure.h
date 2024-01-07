@@ -44,6 +44,7 @@ struct Jeu{
     Joueur j;
     int level;
     int score;
+    int totalScore;
     int sizeMaze;
     int** maze;
     arbreChemins arbreChemin;

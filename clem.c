@@ -4,6 +4,7 @@
 #include "structure.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <time.h>
 
@@ -160,7 +161,7 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
                 break;
             case FIRE:
                 jeu->j.etatDangerJoueur = ETAT_FEU;
-                jeu->j.etatTourRestants = jeu->j.etatTourRestants + 3;
+                jeu->j.etatTourRestants = jeu->j.etatTourRestants + (jeu->level/4)+1;
                 //neverGonnaGiveUP();
                 break;
             case DRUNK:
@@ -175,7 +176,7 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
                 break;
             case POISON:
                 jeu->j.etatDangerJoueur = ETAT_POISON;
-                jeu->j.etatTourRestants = jeu->j.etatTourRestants + 5;
+                jeu->j.etatTourRestants = jeu->j.etatTourRestants + (jeu->level/4)+2;
                 break;
             case SCORE:
                 jeu->score = jeu->score + 500;
@@ -302,7 +303,7 @@ void initJeu(Jeu* jeu){
     jeu->level = 0;
     jeu->score = 0;
     jeu->sizeMaze = INITIALSIZE;
-    jeu->j.pvHealth = 5;
+    jeu->j.pvHealth = 1;
     jeu->typeEvent = NONE;
     jeu->j.inventaire = malloc(5*sizeof(Item)); //5 items max
     for(int nbItems = 0;nbItems < 5; nbItems++){
@@ -425,4 +426,31 @@ void gameOver(int level, int score){
 
 }
 
+void getScoreCSV(Jeu* jeu){
+    FILE* scoreFile = NULL;
+    int oldscore; 
+    char ligne[20];
+    scoreFile = fopen("./out/score.csv", "r");
+    if (scoreFile == NULL) {
+        printf("Erreur ouverture fichier \n");
+    }else{
+        oldscore = atoi(fgets(ligne,20,scoreFile));
+        fclose(scoreFile);
+    }
+    jeu->totalScore= oldscore;
+}
+
+void saveScoreCSV(int oldscore,int score){
+    FILE* scoreFile = NULL;
+    int newscore = 0;
+    scoreFile = fopen("./out/score.csv", "w");
+    if (scoreFile == NULL) {
+        printf("Erreur ouverture fichier \n");
+    }else{
+        newscore = oldscore + score;
+        fprintf(scoreFile,"%d",newscore);
+        fclose(scoreFile);
+    }
+
+}
 

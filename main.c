@@ -11,6 +11,7 @@
 int main(){
     Jeu jeu;
     //affichage menu #ETIENNE
+    getScoreCSV(&jeu);
     initJeu(&jeu);
     while(jeu.level < 30 && jeu.j.pvHealth > 0){
         creerMaze(&jeu);
@@ -30,6 +31,7 @@ int main(){
             jeu.score= jeu.score + (25*jeu.level);
         }
     }
+    saveScoreCSV(jeu.totalScore, jeu.score);
     gameOver(jeu.level,jeu.score);
     free(jeu.maze);
     free(jeu.arbreChemin);
