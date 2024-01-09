@@ -1,4 +1,5 @@
 #include "clem.h"
+#include "etienne.h"
 #include "gabin.h"
 #include "paul.h"
 #include "structure.h"
@@ -30,8 +31,14 @@ arbreChemins creerArbreCheminsCache(arbreChemins a, int positionL, int positionC
         if(maze[a->positions[0]][a->positions[1]] == END){
             a->type = 0;
         }else{
-            a->type = 1;
+            if(maze[a->positions[0]][a->positions[1]] == CHECKPOINT){
+                a->type = 2;
+            }else{
+                a->type = 1;
+
+            }
         }
+        
         
         if(positionC != taille-1){
             if(maze[a->positions[0]][a->positions[1]+1] >= SPACE && (a->positions[0] != a->parent->positions[0] || a->positions[1]+1 != a->parent->positions[1])){ //DROITE
@@ -77,16 +84,24 @@ arbreChemins creerArbreCheminsCache(arbreChemins a, int positionL, int positionC
 
 
 void afficherArbreChemins(arbreChemins a, int** maze){
-
+    printf("[%d - %d] --> %d\n",a->positions[0],a->positions[1],a->type);
     for(int n = 0; n < a->nbFils; n++){
         afficherArbreChemins(a->fils[n],maze);
     }
 }
 
 
-int deplacementValide(int positionL, int positionC, arbreChemins* a){
+int deplacementValide(int positionL, int positionC, arbreChemins* a,Joueur j,int** maze,int taille){
     int val = 0;
     
+    if(positionL > -1 && positionC > -1 && positionC < taille && positionL < taille){
+        if(maze[positionL][positionC] == END){
+            if(!j.findKeys){
+                return 0;
+            }
+        }
+    }
+
     for(int n = 0; n < (*a)->nbFils; n++){
         if((*a)->fils[n]->positions[0] == positionL && (*a)->fils[n]->positions[1] == positionC){
             *a = (*a)->fils[n];
@@ -114,8 +129,7 @@ void ajouterItemInventaire(Jeu* jeu, int type, char* name){
 
 void neverGonnaGiveUP(){
     system("xdg-open https://www.youtube.com/watch?v=dQw4w9WgXcQ &");
-    system("sleep 2");
-    system("clear");     
+    system("sleep 2");  system("clear");     
 }
 
 void healthPotionEvent(Jeu* jeu){
@@ -141,8 +155,8 @@ void milkPotionEvent(Jeu* jeu){
 }
 
 
-void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
-    if((*maze)[positionL][positionsC] == EVENT){
+void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionC){
+    if((*maze)[positionL][positionC] == EVENT){
         jeu->score = jeu->score + 25;
         int precEvent =-1;
         int randomEvent;
@@ -190,6 +204,10 @@ void verifEvent(Jeu* jeu, int*** maze, int positionL, int positionsC){
         }
         jeu->typeEvent = randomEvent;
     }
+    if((*maze)[positionL][positionC] == KEY){
+        jeu->j.findKeys = 1;
+        jeu->score = jeu->score + 100;
+    }
 }
 
 char* emoji(int type){
@@ -225,7 +243,24 @@ void afficherUseItem(int type){
     printf("║ Vous avez utilisé %s ║\n",emoji(type));
     printf("╚═══════════════════════╝\n");
 }
-void eventJoueur(int* typeEvent,Joueur* j){
+
+
+
+void verifPoisonFeu(Joueur* j){
+    if(j->etatDangerJoueur != ETAT_NON_DANGER){
+            if(j->etatDangerJoueur == ETAT_POISON){
+                afficherUseItem(POISON);
+                j->pvHealth--;
+                j->etatTourRestants--;
+            }
+            if(j->etatDangerJoueur == ETAT_FEU){
+                j->pvHealth--;
+                afficherUseItem(FIRE);
+                j->etatTourRestants--;
+            }
+        }
+}
+void verifEtatEvent(Joueur* j,int* typeEvent){
     if(*typeEvent != NONE && j->etatDangerJoueur == ETAT_NON_DANGER){
                 afficherUseItem(*typeEvent);
                 *typeEvent = NONE;
@@ -233,18 +268,11 @@ void eventJoueur(int* typeEvent,Joueur* j){
     if(j->etatTourRestants == 0){
         j->etatDangerJoueur = ETAT_NORMAL;
     }
-    if(j->etatDangerJoueur != ETAT_NON_DANGER){
-        if(j->etatDangerJoueur == ETAT_POISON){
-            afficherUseItem(POISON);
-            j->pvHealth--;
-            j->etatTourRestants--;
-        }
-        if(j->etatDangerJoueur == ETAT_FEU){
-            j->pvHealth--;
-            afficherUseItem(FIRE);
-            j->etatTourRestants--;
-        }
-    }
+}
+
+void eventJoueur(int* typeEvent,Joueur* j,int** maze){
+    verifEtatEvent(j,typeEvent);
+    verifPoisonFeu(j);
 }
 
 
@@ -273,7 +301,7 @@ printf("╔══════════════╗    ╔═════�
 printf("║   ""\e[1;92m""Niveau %d""\e[1;97m""   ║    ║  ""\e[1;33m""%d 🪙""\e[1;97m",(level/2)+1,score);
 scorePrint(lenInt(score));
 printf("╚══════════════╝    ╚══════════════╝\n");
-printf("\e[0m");
+printf(reset);
 }
 
 void afficherInventaire(Jeu jeu){
@@ -281,7 +309,7 @@ printf("\e[1;97m");
 printf("╔═1═╦═2═╦═3═╦═4═╦═5═╗\n");
 printf("║%s║%s║%s║%s║%s║  %d❤️\n",emoji(jeu.j.inventaire[0].type),emoji(jeu.j.inventaire[1].type),emoji(jeu.j.inventaire[2].type),emoji(jeu.j.inventaire[3].type),emoji(jeu.j.inventaire[4].type),jeu.j.pvHealth);
 printf("╚═══╩═══╩═══╩═══╩═══╝\n");
-printf("\e[0m");
+printf(reset);
 }
 
 void useItem(Jeu* jeu, int typeInput){
@@ -299,22 +327,58 @@ void useItem(Jeu* jeu, int typeInput){
     jeu->j.inventaire[typeInput].type = NONE;
 }
 
+void modeHealth(int* pvHealth, int typeMode){
+    switch (typeMode) {
+        case 0:
+            *pvHealth = 10;
+            break;
+        case 1:
+            *pvHealth = 1;
+            break;
+        case 2:
+            *pvHealth = 20;
+            break;
+        default:
+            printf("Erreur Vie");
+            break;
+    
+    }
+}
+
+
 void initJeu(Jeu* jeu){
+    
+    jeu->maze.typeMaze = 1;
+    jeu->posMaze[0] = 1;
+    jeu->posMaze[1] = 0;
     jeu->level = 0;
     jeu->score = 0;
-    jeu->sizeMaze = INITIALSIZE;
-    jeu->j.pvHealth = 1;
+    jeu->maze.sizeMaze = INITIALSIZE;
+    modeHealth(&jeu->j.pvHealth,jeu->options.typeMode);
+    jeu->j.findKeys = 1;
+    jeu->j.etatCheckPoint = 1;
     jeu->typeEvent = NONE;
     jeu->j.inventaire = malloc(5*sizeof(Item)); //5 items max
     for(int nbItems = 0;nbItems < 5; nbItems++){
         jeu->j.inventaire[nbItems].type = NONE;
         jeu->j.inventaire[nbItems].quantite = 0;
     } 
-    jeu->maze = NULL;
+    jeu->maze.tabMaze = NULL;
+    getScoreCSV(jeu);
     srand(time(NULL));
 }
 
-void mazePlacement(int*** maze,int taille,Joueur* j){
+void jouerMaze(Jeu* jeu){
+    system("clear");
+    afficherScore(jeu->level,jeu->score);
+    afficherMatrice1(jeu->maze.tabMaze,jeu->maze.sizeMaze,jeu->options.typeEmoji);
+    afficherInventaire(*jeu);
+    eventJoueur(&jeu->typeEvent,&jeu->j,jeu->maze.tabMaze);
+    deplacementMaze(jeu,&jeu->maze.arbreChemin,&jeu->maze.tabMaze,jeu->j.positions);
+
+}
+
+void mazePlacementSimple(int*** maze,int taille,Joueur* j){
     int randPlacement = rand() % 4; // 0 1 2 3
 
     setEnd(maze,taille,randPlacement);
@@ -322,63 +386,299 @@ void mazePlacement(int*** maze,int taille,Joueur* j){
 
 }
 
+void setCheck( int*** maze, int taille , int randPlacement) {
+    int random = 0;
+    random = 1 + rand() % ( taille - 2 );
+    // Vérifier que la case choisie est vide (pas un mur)
+    // Marquer la case de départ dans la matrice et la retourner
+    switch (randPlacement) {
+        case 2:
+                while ( (*maze)[ random ][ 1 ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ random ][ 0 ] = CHECKPOINT;
+             
+            break;
+        case 3:
+            while ( (*maze)[ taille - 2  ][ random ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ taille - 1 ][ random ] = CHECKPOINT;
+
+            break;
+        case 0:
+                while ( (*maze)[ random ][ taille - 2 ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ random ][ taille - 1 ] = CHECKPOINT;   
+            break;
+        case 1:
+            while ( (*maze)[ 1 ][ random ] != SPACE ) {
+                    random = 1 + rand() % ( taille - 2 );
+                }
+                // Marquer la case de fin dans la matrice
+                (*maze)[ 0 ][ random ] = CHECKPOINT;
+            break;
+        default:
+            break;
+    
+    }
+}
+
+void mazePlacementComplexe(int*** maze, int taille, Joueur*j, int posMazeL,int posMazeC){
+    if(!(posMazeC%2 || posMazeL%2)){
+        // 0 / 0 --> 3 0
+        // 2 / 2 --> 2 1
+        // 0 / 2 --> 3 2
+        // 2 / 0 --> 1 0
+        switch (posMazeC+posMazeL) {
+            case 0:
+                setCheck(maze,taille,3);
+                setCheck(maze,taille,0);
+                break;
+            case 2:
+                if(posMazeL == 2){
+                    setCheck(maze,taille,1);
+                    setCheck(maze,taille,0);;
+
+                }else{
+                    setCheck(maze,taille,3);
+                    setCheck(maze,taille,2);
+                }
+                break;
+            case 4:
+                setCheck(maze,taille,2);
+                setCheck(maze,taille,1);
+                break;
+        }
+ 
+
+    }else{
+        if(posMazeL%2 && posMazeC%2){ //no 3
+            for(int i=0;i<4;i++){
+                setCheck(maze,taille,i);
+            }
+        }else{
+            if(posMazeC == 2){
+            setEnd(maze,taille,2);
+            setCheck(maze,taille,1);
+            setCheck(maze,taille,3);
+            setCheck(maze,taille,2);
+            }
+            if(posMazeC == 0){
+                setCheck(maze,taille,1);
+                setCheck(maze,taille,3);
+                setCheck(maze,taille,0);
+                setStart(maze,taille,2,j);
+            }
+            if(posMazeC == 1){
+                if(posMazeL == 2){
+                    setCheck(maze,taille,1);
+                    setCheck(maze,taille,0);
+                    setCheck(maze,taille,2);
+                }else{
+
+                    setCheck(maze,taille,3);
+                    setCheck(maze,taille,0);
+                    setCheck(maze,taille,2);
+                }
+    
+            
+            }
+        }
+        
+    }
+}
+
+
+void creerMegaMaze(Jeu* jeu){
+    jeu->maze.sizeMaze = INITIALSIZE+(jeu->level);
+    jeu->posMaze[0] = 1;
+    jeu->posMaze[1] = 0;
+
+    int size = 3;
+    jeu->megamaze = (Maze**)malloc(size * sizeof(Maze*));
+    for (int ligne = 0; ligne <  size; ligne++) {
+        jeu->megamaze[ligne] = (Maze*)malloc(size * sizeof(Maze));
+        for (int colonne= 0; colonne < size; colonne++) {
+            mazeGenerator(&jeu->maze.tabMaze,jeu->maze.sizeMaze);
+            mazePlacementComplexe(&jeu->maze.tabMaze,jeu->maze.sizeMaze,&jeu->j,ligne,colonne);
+            jeu->megamaze[ligne][colonne] = jeu->maze;  // Initialiser la matrice avec des murs (-1)
+        }
+    }
+}
+
+
 void creerMaze(Jeu* jeu){
-    jeu->sizeMaze = jeu->sizeMaze + jeu->level;
-    mazeGenerator(&jeu->maze,jeu->sizeMaze);
-    mazePlacement(&jeu->maze,jeu->sizeMaze,&jeu->j); 
-
-    //afficherMatrice1(jeu->maze,jeu->sizeMaze);  
-    // afficherMatrice2(jeu->maze,jeu->sizeMaze);  
-
-    jeu->arbreChemin = creerArbreChemins(NULL, jeu->j.positions[0] , jeu->j.positions[1] , jeu->maze,jeu->sizeMaze);
+    jeu->maze.sizeMaze = jeu->maze.sizeMaze + jeu->level;
+    mazeGenerator(&jeu->maze.tabMaze,jeu->maze.sizeMaze);
+    mazePlacementSimple(&jeu->maze.tabMaze,jeu->maze.sizeMaze,&jeu->j);
+    jeu->maze.arbreChemin = creerArbreChemins(NULL, jeu->j.positions[0] , jeu->j.positions[1] , jeu->maze.tabMaze,jeu->maze.sizeMaze);
 
 }
 
-void placerEvents(Jeu* jeu){
-    for(int nbEvents = 0; nbEvents < jeu->level; nbEvents++){
-        int lrandom = rand() % jeu->sizeMaze;
-        int crandom = rand() % jeu->sizeMaze;
+void placerEvents(Maze* maze,int level){
+    for(int nbEvents = 0; nbEvents < level; nbEvents++){
+        int lrandom = rand() % maze->sizeMaze;
+        int crandom = rand() % maze->sizeMaze;
         do{
-            lrandom = rand() % jeu->sizeMaze;
-            crandom = rand() % jeu->sizeMaze;
+            lrandom = rand() % maze->sizeMaze;
+            crandom = rand() % maze->sizeMaze;
 
-        }while(jeu->maze[lrandom][crandom] != SPACE);
-        jeu->maze[lrandom][crandom] = EVENT;
+        }while(maze->tabMaze[lrandom][crandom] != SPACE);
+        maze->tabMaze[lrandom][crandom] = EVENT;
+    }
+}
+
+void placerKeys(Maze* maze, Joueur* j){
+        j->findKeys = 0;
+        int lrandom = rand() % maze->sizeMaze;
+        int crandom = rand() % maze->sizeMaze;
+        do{
+            lrandom = rand() % maze->sizeMaze;
+            crandom = rand() % maze->sizeMaze;
+
+        }while(maze->tabMaze[lrandom][crandom] != SPACE);
+            maze->tabMaze[lrandom][crandom] = KEY;
+}
+
+void findCheck(Jeu* jeu,int positionInverse,int mode){
+    int i = 1;
+    // mode 1 --> recherche ligne sinon  0 --> recherche colonne
+    afficherMatrice1(jeu->maze.tabMaze,jeu->maze.sizeMaze,jeu->options.typeEmoji);
+    if(mode){
+        while(jeu->maze.tabMaze[i][positionInverse] != CHECKPOINT && i < jeu->maze.sizeMaze){
+            i++;
+        }
+        jeu->j.positions[0] = i;
+        jeu->j.positions[1] = positionInverse;
+    }else{
+        while(jeu->maze.tabMaze[positionInverse][i] != CHECKPOINT && i < jeu->maze.sizeMaze){
+            i++;
+        }
+        jeu->j.positions[0] = positionInverse;
+        jeu->j.positions[1] = i;
+    }
+}
+
+void verifCheck(Jeu* jeu, int** maze, int positionL, int positionC){
+    if(positionL > -1 && positionC > -1 && positionC < jeu->maze.sizeMaze && positionL < jeu->maze.sizeMaze){
+        if((maze[positionL][positionC]) == CHECKPOINT){
+            jeu->j.etatCheckPoint = 0;
+            jeu->maze.tabMaze[jeu->j.positions[0]][jeu->j.positions[1]] = SPACE; 
+            if(positionC == 0){
+                jeu->maze = jeu->megamaze[jeu->posMaze[0]][jeu->posMaze[1]-1];
+                jeu->posMaze[1]--;
+                findCheck(jeu,jeu->maze.sizeMaze-1,1);
+                jeu->maze.arbreChemin = creerArbreChemins(NULL, jeu->j.positions[0] , jeu->j.positions[1] , jeu->maze.tabMaze,jeu->maze.sizeMaze);
+            }
+            if(positionL == 0){
+                jeu->maze = jeu->megamaze[jeu->posMaze[0]-1][jeu->posMaze[1]];
+                jeu->posMaze[0]--;
+
+                findCheck(jeu,jeu->maze.sizeMaze-1,0);
+                jeu->maze.arbreChemin = creerArbreChemins(NULL, jeu->j.positions[0] , jeu->j.positions[1] , jeu->maze.tabMaze,jeu->maze.sizeMaze);
+            }
+            if(positionC == (jeu->maze.sizeMaze-1)){
+                jeu->maze = jeu->megamaze[jeu->posMaze[0]][jeu->posMaze[1]+1];
+                jeu->posMaze[1]++;
+                afficherMatrice1(jeu->maze.tabMaze,jeu->maze.sizeMaze,jeu->options.typeEmoji);
+
+                findCheck(jeu,0,1);
+                jeu->maze.arbreChemin = creerArbreChemins(NULL, jeu->j.positions[0] , jeu->j.positions[1] , jeu->maze.tabMaze,jeu->maze.sizeMaze);
+            
+            }
+            if(positionL == (jeu->maze.sizeMaze-1)){
+                jeu->maze = jeu->megamaze[jeu->posMaze[0]+1][jeu->posMaze[1]];
+                jeu->posMaze[0]++;
+
+                findCheck(jeu,0,0);
+                jeu->maze.arbreChemin = creerArbreChemins(NULL, jeu->j.positions[0] , jeu->j.positions[1] , jeu->maze.tabMaze,jeu->maze.sizeMaze);
+            
+            }
+        }
     }
 }
 
 void deplacementMaze(Jeu* jeu,arbreChemins* a,int*** maze,int positions[2]){
     switch (deplacementTouche(jeu->j.etatSobreJoueur)) {
                 case HAUT:
-                    if(deplacementValide(positions[0]-1,positions[1],a)){
-                        verifEvent(jeu,maze,positions[0]-1,positions[1]);
-                        (*maze)[positions[0]-1][positions[1]] = PLAYER;
-                        (*maze)[positions[0]][positions[1]] = SPACE;
-                        positions[0]--;
+                    if(deplacementValide(positions[0]-1,positions[1],a,jeu->j,*maze,jeu->maze.sizeMaze)){
+                        verifCheck(jeu,*maze,positions[0]-1,positions[1]);
+                        if(jeu->j.etatCheckPoint){
+                            verifEvent(jeu,maze,positions[0]-1,positions[1]);
+                            (*maze)[positions[0]-1][positions[1]] = PLAYER;
+                            (*maze)[positions[0]][positions[1]] = SPACE;
+                            if(jeu->j.etatCheckPoint == 2){
+                                (*maze)[positions[0]][positions[1]] = CHECKPOINT;
+                                jeu->j.etatCheckPoint = 1;
+                            }
+                            positions[0]--;
+
+                        }else{
+                            (*maze)[jeu->j.positions[0]][jeu->j.positions[1]] = PLAYER;
+                            jeu->j.etatCheckPoint = 2;
+                        }
                     }
                     break;
                 case DROITE:
-                    if(deplacementValide(positions[0],positions[1]+1,a)){
-                        verifEvent(jeu,maze,positions[0],positions[1]+1);
-                        (*maze)[positions[0]][positions[1]+1] = PLAYER;
-                        (*maze)[positions[0]][positions[1]] = SPACE;
-                        positions[1]++;
-                    }   
+                    if(deplacementValide(positions[0],positions[1]+1,a,jeu->j,*maze,jeu->maze.sizeMaze)){
+                        verifCheck(jeu,*maze,positions[0],positions[1]+1);
+                        if(jeu->j.etatCheckPoint){
+                            verifEvent(jeu,maze,positions[0],positions[1]+1);
+                            (*maze)[positions[0]][positions[1]+1] = PLAYER;
+                            (*maze)[positions[0]][positions[1]] = SPACE;
+                            if(jeu->j.etatCheckPoint == 2){
+                                (*maze)[positions[0]][positions[1]] = CHECKPOINT;
+                                jeu->j.etatCheckPoint = 1;
+                            }
+                            positions[1]++;
+                            
+                        }else{
+                            (*maze)[jeu->j.positions[0]][jeu->j.positions[1]] = PLAYER;
+                            jeu->j.etatCheckPoint = 2;
+                        }
+                    } 
                     break;
                 case GAUCHE:
-                    if(deplacementValide(positions[0],positions[1]-1,a)){
-                        verifEvent(jeu,maze,positions[0],positions[1]-1);
-                        (*maze)[positions[0]][positions[1]-1] = PLAYER;
-                        (*maze)[positions[0]][positions[1]] = SPACE;
-                        positions[1]--;
+                    if(deplacementValide(positions[0],positions[1]-1,a,jeu->j,*maze,jeu->maze.sizeMaze)){
+                        verifCheck(jeu,*maze,positions[0],positions[1]-1);
+                        if(jeu->j.etatCheckPoint){
+                            verifEvent(jeu,maze,positions[0],positions[1]-1);
+                            (*maze)[positions[0]][positions[1]-1] = PLAYER;
+                            (*maze)[positions[0]][positions[1]] = SPACE;
+                            if(jeu->j.etatCheckPoint == 2){
+                                (*maze)[positions[0]][positions[1]] = CHECKPOINT;
+                                jeu->j.etatCheckPoint = 1;
+                            }
+                            positions[1]--;
+                            
+                        }else{
+                            (*maze)[jeu->j.positions[0]][jeu->j.positions[1]] = PLAYER;
+                            jeu->j.etatCheckPoint = 2;
+                        }
                     }
                     break;
                 case BAS:
-                    if(deplacementValide(positions[0]+1,positions[1],a)){
-                        verifEvent(jeu,maze,positions[0]+1,positions[1]);
-                        (*maze)[positions[0]+1][positions[1]] = PLAYER;
-                        (*maze)[positions[0]][positions[1]] = SPACE;
-                        positions[0]++;
+                    if(deplacementValide(positions[0]+1,positions[1],a,jeu->j,*maze,jeu->maze.sizeMaze)){
+                        verifCheck(jeu,*maze,positions[0]+1,positions[1]);
+                        if(jeu->j.etatCheckPoint){
+                            verifEvent(jeu,maze,positions[0]+1,positions[1]);
+                            (*maze)[positions[0]+1][positions[1]] = PLAYER;
+                            (*maze)[positions[0]][positions[1]] = SPACE;
+                            if(jeu->j.etatCheckPoint == 2){
+                                (*maze)[positions[0]][positions[1]] = CHECKPOINT;
+                                jeu->j.etatCheckPoint = 1;
+                            }
+                            positions[0]++;
+                            
+                        }else{
+                            (*maze)[jeu->j.positions[0]][jeu->j.positions[1]] = PLAYER;
+                            jeu->j.etatCheckPoint = 2;
+                        }
                     }
                     break;
                 case HOTBAR1:
@@ -404,8 +704,56 @@ void deplacementMaze(Jeu* jeu,arbreChemins* a,int*** maze,int positions[2]){
             }
 }
 
-void gameOver(int level, int score){
+void playMazeSimple(Jeu* jeu){
+        creerMaze(jeu);
+            mazeCSV(&jeu->maze);
+            placerEvents(&jeu->maze,jeu->level);
+            while(jeu->maze.arbreChemin->type && jeu->j.pvHealth > 0){
+                jouerMaze(jeu);
+            }
+}
+void playMegaMaze(Jeu* jeu){
+    creerMegaMaze(jeu);
+                jeu->maze = jeu->megamaze[jeu->posMaze[0]][jeu->posMaze[1]];
+                jeu->maze.arbreChemin = creerArbreChemins(NULL, jeu->j.positions[0] , jeu->j.positions[1] , jeu->maze.tabMaze,jeu->maze.sizeMaze);
+                for(int i = 0; i < 3 ;i++){
+                    for(int j = 0; j < 3;j++){
+                        /// paul ici
+                        placerEvents(&jeu->megamaze[i][j],jeu->level/2);
+                        mazebigCSV(&jeu->megamaze[i][j],i,j);
+                        }
+                    }
+                placerKeys(&jeu->megamaze[rand() % 3][rand() % 3],&jeu->j);
+                while((!jeu->j.findKeys || jeu->maze.arbreChemin->type) && jeu->j.pvHealth > 0){
+                    jouerMaze(jeu);
+                }
+    }
+
+void jouerJeu(Jeu* jeu){
+    while(jeu->level < 30 && jeu->j.pvHealth > 0){
+        if(jeu->level > ((jeu->options.typeLevel+2)*4)-1){ // 0 --> 4 --> 8 --> 7 / 1 --> 6 / 2 --> 8
+            jeu->maze.typeMaze = 0;
+        }
+
+        if (jeu->maze.typeMaze){
+            playMazeSimple(jeu);
+        }else{
+            playMegaMaze(jeu);
+        }
+        
+        if(jeu->j.pvHealth > 0){
+            free(jeu->maze.tabMaze);
+            free(jeu->maze.arbreChemin);
+            jeu->level=jeu->level+2;
+            jeu->score= jeu->score + (25*jeu->level);
+        }
+    }
+}
+
+
+void gameOver(int level, int score,int highScore){    
     system("clear");
+    saveHighScoreCSV(highScore,score);
     afficherScore(level,score);
     printf("\e[1;92m""⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⡀⠀\n");
     printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣤⠀⠀⠀⢀⣴⣿⡶⠀⣾⣿⣿⡿⠟⠛⠁\n");
@@ -423,34 +771,152 @@ void gameOver(int level, int score){
     printf("⠀⠀⠀⣿⣿⡇⠀⠀⢀⣴⣿⣿⡟⠀⣿⣿⣿⣿⠃⠀⠀⣾⣿⣿⡿⠿⠛⢛⣿⡟⠀⠀⠀⠀⠀⠻⠿⠀⠀\n");
     printf("⠀⠀⠀⠹⣿⣿⣶⣾⣿⣿⣿⠟⠁⠀⠸⢿⣿⠇⠀⠀⠀⠛⠛⠁⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀\n");
     printf("⠀⠀⠀⠀⠈⠙⠛⠛⠛⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n""\e[0m");
-
+    sleep(5);
 }
 
 void getScoreCSV(Jeu* jeu){
     FILE* scoreFile = NULL;
-    int oldscore; 
+    int highScore; 
     char ligne[20];
     scoreFile = fopen("./out/score.csv", "r");
     if (scoreFile == NULL) {
+        highScore = 0;
         printf("Erreur ouverture fichier \n");
     }else{
-        oldscore = atoi(fgets(ligne,20,scoreFile));
+        highScore = atoi(fgets(ligne,20,scoreFile));
         fclose(scoreFile);
     }
-    jeu->totalScore= oldscore;
+    jeu->highScore = highScore;
 }
 
-void saveScoreCSV(int oldscore,int score){
+void saveHighScoreCSV(int highScore,int score){
     FILE* scoreFile = NULL;
-    int newscore = 0;
     scoreFile = fopen("./out/score.csv", "w");
     if (scoreFile == NULL) {
         printf("Erreur ouverture fichier \n");
     }else{
-        newscore = oldscore + score;
-        fprintf(scoreFile,"%d",newscore);
+        if(score > highScore){
+            fprintf(scoreFile,"%d",score);
+        }else{
+            fprintf(scoreFile,"%d",highScore);
+        }
         fclose(scoreFile);
     }
+}
+
+void initOptions(char**** optionsTab,Options* options){
+    options->typeEmoji = 0;
+    options->typeLevel = 1;
+    options->typeMode = 0;
+
+    (*optionsTab) = malloc(3*sizeof(char**));
+    for (int i=0; i<3; i++){
+        (*optionsTab)[i]=malloc(3*sizeof(char*));
+        for (int j=0; j<3; j++){
+        (*optionsTab)[i][j]=malloc(100*sizeof(char));
+    }
+    }
+    (*optionsTab)[0][0] = "╔═════╦═══════════════╦════════════════╗\n║  ║  ║  ═══╗  ════╗  ╚═══════  ══╦══  ║\n║  ╚══╩═══  ╠══════╩═══════╦══════╩══  ║\n║  ╔════════╣   "BWHT"< SKIN >"BPUR"   ╠════════╗  ║\n║  ║  ╔═════╣    "BWHT"◀ 👾 ▶"BPUR"    ╠═══  ═══╝  ║\n║  ║  ╚══╗  ║   "BPUR"< MODE >"BPUR"   ║  ╔════════╣\n║  ╠══╗  ║  ║              ║  ║  ════  ║\n║     ║  ║  ║  "BPUR"< NIVEAU >"BPUR"  ║  ╚═════╗  ║\n╠══╣  ║  ║  ║              ║  ╔═════╝  ║\n║  ╚══╝  ║  ╚══════════════╝  ║  ║  ║  ║\n╚════════════════════════════════╩══╩══╝\n";
+    (*optionsTab)[0][1] = "╔═════╦═══════════════╦════════════════╗\n║  ║  ║  ═══╗  ════╗  ╚═══════  ══╦══  ║\n║  ╚══╩═══  ╠══════╩═══════╦══════╩══  ║\n║  ╔════════╣   "BWHT"< SKIN >"BPUR"   ╠════════╗  ║\n║  ║  ╔═════╣    "BWHT"◀ 🤡 ▶"BPUR"    ╠═══  ═══╝  ║\n║  ║  ╚══╗  ║   "BPUR"< MODE >"BPUR"   ║  ╔════════╣\n║  ╠══╗  ║  ║              ║  ║  ════  ║\n║     ║  ║  ║  "BPUR"< NIVEAU >"BPUR"  ║  ╚═════╗  ║\n╠══╣  ║  ║  ║              ║  ╔═════╝  ║\n║  ╚══╝  ║  ╚══════════════╝  ║  ║  ║  ║\n╚════════════════════════════════╩══╩══╝\n";
+    (*optionsTab)[0][2] = "╔═════╦═══════════════╦════════════════╗\n║  ║  ║  ═══╗  ════╗  ╚═══════  ══╦══  ║\n║  ╚══╩═══  ╠══════╩═══════╦══════╩══  ║\n║  ╔════════╣   "BWHT"< SKIN >"BPUR"   ╠════════╗  ║\n║  ║  ╔═════╣    "BWHT"◀ 💎 ▶"BPUR"    ╠═══  ═══╝  ║\n║  ║  ╚══╗  ║   "BPUR"< MODE >"BPUR"   ║  ╔════════╣\n║  ╠══╗  ║  ║              ║  ║  ════  ║\n║     ║  ║  ║  "BPUR"< NIVEAU >"BPUR"  ║  ╚═════╗  ║\n╠══╣  ║  ║  ║              ║  ╔═════╝  ║\n║  ╚══╝  ║  ╚══════════════╝  ║  ║  ║  ║\n╚════════════════════════════════╩══╩══╝\n";
+    
+    
+    
+    
+    (*optionsTab)[1][0] = "╔═════╦═══════════════╦════════════════╗\n║  ║  ║  ═══╗  ════╗  ╚═══════  ══╦══  ║\n║  ╚══╩═══  ╠══════╩═══════╦══════╩══  ║\n║  ╔════════╣   "BPUR"< SKIN >"BPUR"   ╠════════╗  ║\n║  ║  ╔═════╣              ╠═══  ═══╝  ║\n║  ║  ╚══╗  ║   "BWHT"< MODE >"BPUR"   ║  ╔════════╣\n║  ╠══╗  ║  ║  "BWHT"◀ NORMAL ▶"BPUR"  ║  ║  ════  ║\n║     ║  ║  ║  "BPUR"< NIVEAU >"BPUR"  ║  ╚═════╗  ║\n╠══╣  ║  ║  ║              ║  ╔═════╝  ║\n║  ╚══╝  ║  ╚══════════════╝  ║  ║  ║  ║\n╚════════════════════════════════╩══╩══╝\n";
+    (*optionsTab)[1][1] = "╔═════╦═══════════════╦════════════════╗\n║  ║  ║  ═══╗  ════╗  ╚═══════  ══╦══  ║\n║  ╚══╩═══  ╠══════╩═══════╦══════╩══  ║\n║  ╔════════╣   "BPUR"< SKIN >"BPUR"   ╠════════╗  ║\n║  ║  ╔═════╣              ╠═══  ═══╝  ║\n║  ║  ╚══╗  ║   "BWHT"< MODE >"BPUR"   ║  ╔════════╣\n║  ╠══╗  ║  ║   "BWHT"◀ HARD ▶"BPUR"   ║  ║  ════  ║\n║     ║  ║  ║  "BPUR"< NIVEAU >"BPUR"  ║  ╚═════╗  ║\n╠══╣  ║  ║  ║              ║  ╔═════╝  ║\n║  ╚══╝  ║  ╚══════════════╝  ║  ║  ║  ║\n╚════════════════════════════════╩══╩══╝\n";
+    (*optionsTab)[1][2] = "╔═════╦═══════════════╦════════════════╗\n║  ║  ║  ═══╗  ════╗  ╚═══════  ══╦══  ║\n║  ╚══╩═══  ╠══════╩═══════╦══════╩══  ║\n║  ╔════════╣   "BPUR"< SKIN >"BPUR"   ╠════════╗  ║\n║  ║  ╔═════╣              ╠═══  ═══╝  ║\n║  ║  ╚══╗  ║   "BWHT"< MODE >"BPUR"   ║  ╔════════╣\n║  ╠══╗  ║  ║   "BWHT"◀ EASY ▶"BPUR"   ║  ║  ════  ║\n║     ║  ║  ║  "BPUR"< NIVEAU >"BPUR"  ║  ╚═════╗  ║\n╠══╣  ║  ║  ║              ║  ╔═════╝  ║\n║  ╚══╝  ║  ╚══════════════╝  ║  ║  ║  ║\n╚════════════════════════════════╩══╩══╝\n";
+    
+    (*optionsTab)[2][0] = "╔═════╦═══════════════╦════════════════╗\n║  ║  ║  ═══╗  ════╗  ╚═══════  ══╦══  ║\n║  ╚══╩═══  ╠══════╩═══════╦══════╩══  ║\n║  ╔════════╣   "BPUR"< SKIN >"BPUR"   ╠════════╗  ║\n║  ║  ╔═════╣              ╠═══  ═══╝  ║\n║  ║  ╚══╗  ║   "BPUR"< MODE >"BPUR"   ║  ╔════════╣\n║  ╠══╗  ║  ║              ║  ║  ════  ║\n║     ║  ║  ║  "BWHT"< NIVEAU >"BPUR"  ║  ╚═════╗  ║\n╠══╣  ║  ║  ║     "BWHT"◀ 4 ▶"BPUR"    ║  ╔═════╝  ║\n║  ╚══╝  ║  ╚══════════════╝  ║  ║  ║  ║\n╚════════════════════════════════╩══╩══╝\n";
+    (*optionsTab)[2][1] = "╔═════╦═══════════════╦════════════════╗\n║  ║  ║  ═══╗  ════╗  ╚═══════  ══╦══  ║\n║  ╚══╩═══  ╠══════╩═══════╦══════╩══  ║\n║  ╔════════╣   "BPUR"< SKIN >"BPUR"   ╠════════╗  ║\n║  ║  ╔═════╣              ╠═══  ═══╝  ║\n║  ║  ╚══╗  ║   "BPUR"< MODE >"BPUR"   ║  ╔════════╣\n║  ╠══╗  ║  ║              ║  ║  ════  ║\n║     ║  ║  ║  "BWHT"< NIVEAU >"BPUR"  ║  ╚═════╗  ║\n╠══╣  ║  ║  ║     "BWHT"◀ 6 ▶"BPUR"    ║  ╔═════╝  ║\n║  ╚══╝  ║  ╚══════════════╝  ║  ║  ║  ║\n╚════════════════════════════════╩══╩══╝\n";
+    (*optionsTab)[2][2] = "╔═════╦═══════════════╦════════════════╗\n║  ║  ║  ═══╗  ════╗  ╚═══════  ══╦══  ║\n║  ╚══╩═══  ╠══════╩═══════╦══════╩══  ║\n║  ╔════════╣   "BPUR"< SKIN >"BPUR"   ╠════════╗  ║\n║  ║  ╔═════╣              ╠═══  ═══╝  ║\n║  ║  ╚══╗  ║   "BPUR"< MODE >"BPUR"   ║  ╔════════╣\n║  ╠══╗  ║  ║              ║  ║  ════  ║\n║     ║  ║  ║  "BWHT"< NIVEAU >"BPUR"  ║  ╚═════╗  ║\n╠══╣  ║  ║  ║     "BWHT"◀ 8 ▶"BPUR"    ║  ╔═════╝  ║\n║  ╚══╝  ║  ╚══════════════╝  ║  ║  ║  ║\n╚════════════════════════════════╩══╩══╝\n";
 
 }
+
+void saveOptions(Options* options,int numOptions,int numTest){
+    switch (numOptions) {
+        case 0:
+            options->typeEmoji = numTest;
+            break;
+        case 1:
+            options->typeMode = numTest;
+            break;
+        case 2:
+            options->typeLevel = numTest;
+            break;
+    }
+}
+
+int getOptions(Options* options,int numOptions){
+    switch (numOptions) {
+        case 0:
+            return options->typeEmoji;
+        case 1:
+            return options->typeMode;
+        case 2:
+            return options->typeLevel;
+        default:
+            return 0;
+    } 
+}
+
+void optionChange(Options* options,char*** optionsTab){
+    int lecture=0;
+    int numOptions = 0;
+    int numTest = 0;
+
+    while(!lecture){
+        printf(reset);
+        system("clear");
+        // printf("\e[4;33m""\nOptions\n");
+        printf(BPUR);
+        printf("%s",optionsTab[numOptions][numTest]);
+        saveOptions(options,numOptions,numTest);
+        switch (deplacementTouche(ETAT_OPTION)) {
+            case HAUT:
+                numOptions--;
+                if(numOptions==-1){
+                    numOptions=2;
+                }
+                numTest = getOptions(options,numOptions);
+                break;
+            case BAS:
+                numOptions++;
+                if(numOptions==3){
+                    numOptions=0;
+                }
+                numTest = getOptions(options,numOptions);
+                break;
+            case DROITE:
+                numTest++;
+                if(numTest==3){
+                    numTest=0;
+                }
+                break;
+            case GAUCHE:
+                numTest--;
+                if(numTest==-1){
+                    numTest=2;
+                }
+                break;
+            case ENTER:
+                lecture=1;
+                break;
+        }
+        printf(BGRN);
+        // choixMenu(lireMenu());
+}
+}
+
+
+void freeGame(Jeu* jeu){
+    free(jeu->maze.tabMaze);
+    free(jeu->maze.arbreChemin);
+    free(jeu->megamaze);
+    free(jeu->j.inventaire);
+    jeu->j.etatDangerJoueur = ETAT_NON_DANGER;
+    jeu->j.etatSobreJoueur = ETAT_NORMAL;
+    jeu->j.etatTourRestants = 0;
+}
+
 

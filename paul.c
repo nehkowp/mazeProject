@@ -17,22 +17,71 @@ char deplacementTouche(int etatJoueur){
   char c;
   int pastermine=1;//par défaut on le met à vrai
 
-  /* on est obligé d'appuyer sur la touche entrée */
-  //c =getchar();
-
 
   // Back up current TTY settings
   tcgetattr(STDIN_FILENO, &tty_opts_backup);
-
 
   // Change TTY settings mode
   cfmakeraw(&tty_opts_raw);
   tcsetattr(STDIN_FILENO, TCSANOW, &tty_opts_raw);
 
   while (pastermine) {
-    // ZQSD
+
+
     c = getchar();
-    if (etatJoueur == 1) {
+
+    if (etatJoueur == ETAT_ENTER){
+      switch(c){
+        case ENTER:
+          pastermine =0;
+          break;
+        default:
+          break;
+      }
+    }
+
+    if (etatJoueur == ETAT_OPTION) {
+      switch (c) {
+        case HAUT:
+          pastermine = 0;
+          break;
+        case BAS:
+          pastermine = 0;
+          break;
+        case ENTER:
+          pastermine = 0;
+          break;
+        case DROITE:
+          pastermine = 0;
+          break;
+        case GAUCHE:
+          pastermine = 0;
+          break;
+
+        default:
+          break;
+      }
+    }
+
+
+    if (etatJoueur == ETAT_MENU) {
+      switch (c) {
+        case HAUT:
+          pastermine = 0;
+          break;
+        case BAS:
+          pastermine = 0;
+          break;
+        case ENTER:
+          pastermine = 0;
+          break;
+
+        default:
+          break;
+      }
+    }
+    
+    if (etatJoueur == ETAT_DRUNK) {
       switch (c) {
         case HAUT:
           c = BAS;
@@ -53,74 +102,62 @@ char deplacementTouche(int etatJoueur){
         case HOTBAR1: 
           pastermine=0;
           break;
-        case HOTBAR2: //bas
+        case HOTBAR2:
           pastermine=0;
           break;
-        case HOTBAR3: //bas
-          //printf("vous avez écrit %d => %c bas !",c,c);
+        case HOTBAR3:
           pastermine=0;
           break;
-        case HOTBAR4: //bas
-          //printf("vous avez écrit %d => %c bas !",c,c);
+        case HOTBAR4:
           pastermine=0;
           break;
-        case HOTBAR5: //bas
-          //printf("vous avez écrit %d => %c bas !",c,c);
+        case HOTBAR5:
           pastermine=0;
           break;
         default:
           break;
       }
     }
+    
     switch(c){
-    case HAUT: //haut
-      //printf("vous avez écrit %d => %c haut !",c,c);
-      pastermine=0;
-      break;
-    case GAUCHE: //gauche
-      //printf("vous avez écrit %d => %c gauche !",c,c);
-      pastermine=0;
-      break;
-    case DROITE: //droite
-      //printf("vous avez écrit %d => %c droite !",c,c);;
-      pastermine=0;
-      break;
-    case BAS: //bas
-      //printf("vous avez écrit %d => %c bas !",c,c);
-      pastermine=0;
-      break;
-    case HOTBAR1: //bas
-      //printf("vous avez écrit %d => %c bas !",c,c);
-      pastermine=0;
-      break;
-    case HOTBAR2: //bas
-      //printf("vous avez écrit %d => %c bas !",c,c);
-      pastermine=0;
-      break;
-    case HOTBAR3: //bas
-      //printf("vous avez écrit %d => %c bas !",c,c);
-      pastermine=0;
-      break;
-    case HOTBAR4: //bas
-      //printf("vous avez écrit %d => %c bas !",c,c);
-      pastermine=0;
-      break;
-    case HOTBAR5: //bas
-      //printf("vous avez écrit %d => %c bas !",c,c);
-      pastermine=0;
-      break;
-
-    case 97:
-      printf("vous avez tapé la lettre %c pour quitter le programme!",c);
+      case HAUT:
+        pastermine=0;
+        break;
+      case GAUCHE:
+        pastermine=0;
+        break;
+      case DROITE:
+        pastermine=0;
+        break;
+      case BAS:
+        pastermine=0;
+        break;
+      case HOTBAR1:
+        pastermine=0;
+        break;
+      case HOTBAR2:
+        pastermine=0;
+        break;
+      case HOTBAR3:
+        pastermine=0;
+        break;
+      case HOTBAR4:
+        pastermine=0;
+        break;
+      case HOTBAR5:
+        pastermine=0;
+        break;
+      case 97:
+        printf("\n Vous avez tapé la lettre %c qui permet de quitter le programme!",c);
       
-  /* NE PAS OUBLIER : sinon on ne peut plus écrire dans le terminal */
-  // Restore previous TTY settings
-      //emptyBuffer();
-      tcsetattr(STDIN_FILENO, TCSANOW, &tty_opts_backup);
-      printf("\n");
-      exit(0);
-    default:
-      printf("NON prise en compte\n");
+        /* NE PAS OUBLIER : sinon on ne peut plus écrire dans le terminal */
+        // Restore previous TTY settings
+        tcsetattr(STDIN_FILENO, TCSANOW, &tty_opts_backup);
+        printf("\n");
+        exit(0);
+      default:
+        printf("NON prise en compte\r\n");
+        break;
     }
   }
 
@@ -132,3 +169,39 @@ char deplacementTouche(int etatJoueur){
   return c;
 
 }
+
+
+void mazeCSV(Maze* maze) {
+    FILE *fichier = fopen("out/maze.csv", "w");
+
+    if (fichier == NULL) {
+        printf("Impossible d'ouvrir le fichier");
+    }
+    for(int i=0;i<(maze->sizeMaze);i++){
+      for(int j=0;j<(maze->sizeMaze);j++){
+        fprintf(fichier,"%d ",maze->tabMaze[i][j]);
+      }
+      fprintf(fichier, "\n");
+    }
+
+    fclose(fichier);
+}
+
+
+void mazebigCSV(Maze* maze, int i, int j) {
+    char fichiers[40];
+    snprintf(fichiers, sizeof(fichiers), "./out/megaMazeCSV/maze%d%d.csv",i,j);
+    FILE *fichier = fopen(fichiers, "w");
+
+    if (fichier == NULL) {
+        printf("Impossible d'ouvrir le fichier");
+    }
+    for(int i=0;i<maze->sizeMaze;i++){
+      for(int j=0;j<maze->sizeMaze;j++){
+        fprintf(fichier,"%d ",maze->tabMaze[i][j]);
+      }
+      fprintf(fichier, "\n");
+    }
+
+    fclose(fichier);
+} 

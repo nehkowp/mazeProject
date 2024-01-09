@@ -6,33 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-// IL VA FALLOIR RENOMMER LES FICHIERS ")
 
 int main(){
+    while(1){
     Jeu jeu;
-    //affichage menu #ETIENNE
-    getScoreCSV(&jeu);
+    choixMenu(lireMenu(),&jeu.options);
     initJeu(&jeu);
-    while(jeu.level < 30 && jeu.j.pvHealth > 0){
-        creerMaze(&jeu);
-        placerEvents(&jeu);
-        while(jeu.arbreChemin->type && jeu.j.pvHealth > 0) {
-            system("clear");
-            afficherScore(jeu.level,jeu.score);
-            afficherMatrice1(jeu.maze,jeu.sizeMaze);
-            afficherInventaire(jeu);
-            eventJoueur(&jeu.typeEvent,&jeu.j);
-            deplacementMaze(&jeu,&jeu.arbreChemin,&jeu.maze,jeu.j.positions);
-            }
-        if(jeu.j.pvHealth > 0){
-            free(jeu.maze);
-            free(jeu.arbreChemin);
-            jeu.level=jeu.level+2;
-            jeu.score= jeu.score + (25*jeu.level);
-        }
+    jouerJeu(&jeu);
+    gameOver(jeu.level,jeu.score,jeu.highScore);
+    freeGame(&jeu);
     }
-    saveScoreCSV(jeu.totalScore, jeu.score);
-    gameOver(jeu.level,jeu.score);
-    free(jeu.maze);
-    free(jeu.arbreChemin);
 }

@@ -12,9 +12,7 @@ void setStart( int*** maze, int taille , int randPlacement, Joueur* j) {
     int random = 0;
     random = 1 + rand() % ( taille - 2 );
     // Vérifier que la case choisie est vide (pas un mur)
-    while ( (*maze)[ random ][ 1 ] != SPACE ) {
-        random = 1 + rand() % ( taille - 2 );
-    }
+
     // Marquer la case de départ dans la matrice et la retourner
     switch (randPlacement) {
         case 2:
@@ -101,9 +99,22 @@ void setEnd(int*** maze, int taille,int randPlacement) {
 
 }
 
+void afficherJoueur(int typeEmoji){
+    switch (typeEmoji) {
+        case 0:
+            printf("👾"); // Joueur
+            break;
+        case 1:
+            printf("🤡"); // Joueur
+            break;
+        case 2:
+            printf("💎"); // Joueur
+            break;
+    }
+}
 
 
-void afficherMatrice1(int** matrice , int n) {
+void afficherMatrice1(int** matrice , int n, int typeEmoji) {
    // Afficher la matrice avec des symboles correspondant aux éléments
    for(int i = 0; i < n; i++){
         for(int j =0; j < n; j++){
@@ -115,13 +126,19 @@ void afficherMatrice1(int** matrice , int n) {
                     printf("🧱"); // Mur
                     break;
                 case PLAYER:
-                    printf("👾"); // Joueur
+                    afficherJoueur(typeEmoji);
                     break;
                 case END:
                     printf("🏁"); //Point d'arrivée
                     break;
                 case EVENT:
                     printf("❔");
+                    break;
+                case KEY:
+                    printf("🗝️");
+                    break;
+                case CHECKPOINT:
+                    printf("🚩");
                     break;
                 default:
                     break; 

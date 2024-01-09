@@ -5,15 +5,19 @@
 #include "structure.h"
 #define WALL 0
 #define SPACE 1
+#define END 2
+#define START 3
+#define PLAYER 3
+#define KEY 4
 #define EVENT 5
+#define CHECKPOINT 6
+
+
 #define DIR 4
 #define VALUES 19
-#define PLAYER 3
-#define START 3
-#define END 2
 #define INITIALSIZE 7
 
-void afficherMatrice1(int** matrice , int taille);
+void afficherMatrice1(int** matrice , int taille, int typeEmoji);
 void allouerTab1(int** tab, int taille);
 void allouerTab2(int*** tab, int taille);
 

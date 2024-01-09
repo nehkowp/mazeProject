@@ -1,2 +1,5 @@
 *.o
 exe
+out/score.csv
+out/maze.csv
+out/megaMazeCSV/*.csv
