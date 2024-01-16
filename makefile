@@ -3,27 +3,27 @@ _WHITE=\033[1;37m
 END=\033[0m
 BGreen=\033[1;32m
 
-exe: clem.o paul.o gabin.o etienne.o main.o
-	gcc -g clem.o paul.o gabin.o etienne.o main.o -o exe
+exe: game.o event.o generation.o affichage.o main.o
+	gcc -g game.o event.o generation.o affichage.o main.o -o exe
 	@echo "${BGreen}[✔] TEST EXE PASSED${END}"
 
-gabin.o: gabin.c gabin.h structure.h
-	gcc -g -c gabin.c -o gabin.o -Wall
-	@echo "${BGreen}[✔] TEST GABIN PASSED${END}"
+generation.o: generation.c generation.h structure.h
+	gcc -g -c generation.c -o generation.o -Wall
+	@echo "${BGreen}[✔] TEST generation PASSED${END}"
 
-etienne.o: etienne.c etienne.h structure.h
-	gcc -g -c etienne.c -o etienne.o -Wall
-	@echo "${BGreen}[✔] TEST ETIENNE PASSED${END}"
+affichage.o: affichage.c affichage.h structure.h
+	gcc -g -c affichage.c -o affichage.o -Wall
+	@echo "${BGreen}[✔] TEST affichage PASSED${END}"
 	
-paul.o: paul.c paul.h structure.h
-	gcc -g -c paul.c -o paul.o -Wall
-	@echo "${BGreen}[✔] TEST PAUL PASSED${END}"
+event.o: event.c event.h structure.h
+	gcc -g -c event.c -o event.o -Wall
+	@echo "${BGreen}[✔] TEST event PASSED${END}"
 
-clem.o: clem.c clem.h structure.h
-	gcc -g -c clem.c -o clem.o -Wall
-	@echo "${BGreen}[✔] TEST CLEM PASSED${END}"
+game.o: game.c game.h structure.h
+	gcc -g -c game.c -o game.o -Wall
+	@echo "${BGreen}[✔] TEST game PASSED${END}"
 
-main.o: main.c paul.h gabin.h etienne.h clem.h structure.h
+main.o: main.c event.h generation.h affichage.h game.h structure.h
 	gcc -g -c main.c -o main.o -Wall
 	@echo "${BGreen}[✔] TEST MAIN PASSED${END}"
 

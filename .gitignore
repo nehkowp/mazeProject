@@ -1,5 +1,10 @@
 *.o
 exe
 out/score.csv
+out/m.csv
 out/maze.csv
 out/megaMazeCSV/*.csv
+Doxyfile
+favicon.ico
+doxygen-awesome-css/
+header.html
